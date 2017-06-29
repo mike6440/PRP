@@ -1,0 +1,52 @@
+POST PROCESSING AOD DATA
+
+ORIGINAL FILES
+----------------
+level0 -- Raw data from PRP computer
+	Pssyyjjj.DAi, i=0,1,2...7
+	eight files per day.
+
+level1 -- First pass processing 2-min averages
+	da0_avg_hdr.txt
+	da0_avg.txt			2-min avg means
+	da0_raw.txt 		sweep-by-sweep global
+	dai_avg.txt			i=1,2,..7
+
+level2 -- derived data
+	dai_rad.txt i=1,...7
+	aodi_hdr.txt
+	aodi.txt
+
+PRP2 FILES
+--------------------
+level0 (data_yyyyMMddhhThhmmssZ)
+	gpsyyMMdd.dat		gps data
+	tcmyyMMdd.dat		tcm (tilt) data
+	radyyMMdd.dat		rad (global rad) data
+	rsryyMMdd.dat		sweep data for all channels.
+
+level1
+	WE WILL WRITE CODE TO MAKE THESE EXACTLY THE SAME AS STANDARD PRP.
+
+level2
+	DITTO
+
+
+DA0_AVG FILE
+---------------------------------
+output data file: 
+nrec yyyy MM dd hh mm ss lat lon saz sze sw swstd lw lwstd piru tcase tdome pitch pstd roll rstd az sog cog hdg sol_n sol_d
+Merge data from gps, tcm, and rad.  2-min averages
+
+gps dat. 2-min avg
+yyyy MM dd hh mm ss    lat       lon        sog    cog    var
+2011 11 06 00 00 00  -0.69055   73.15006   0.00    0.0  -5.1
+
+tcm dat.  2-min avg
+yyyy MM dd hh mm ss  pitch   sigp  roll   sigr  comp  sigc   temp    xmag    ymag    zmag
+2011 11 06 00 00 00   -1.2   0.1   -1.1  -999.0  205.4   0.0   21.5  -40.485  19.264  -8.652
+
+rad dat. 2-min avg
+yyyy MM dd hh mm ss    sw    lw      pir     tcase  tdome   tpcb  batt
+2011 11 06 00 00 00    -1.2  409.3  -111.8   26.19  26.16   32.6  10.5
+

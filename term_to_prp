@@ -1,0 +1,34 @@
+#!/usr/bin/expect --
+#term_to_isar.ex (MAC)
+#Note: the file .kermrc has the command "prompt k>>"
+# to do
+# Find the correct USB plug
+# 
+
+
+log_user 0
+# SETUP FILE DEFINED
+set setupfile [lindex $argv 0]
+
+## SEE IF THE SETUP FILE EXISTS
+if [catch {open $setupfile} sufile] {
+	puts "Setup file open fails, exit 1"
+	exit 1
+}
+
+	#==============
+	# SERIAL OR ETHERNET
+	#==============
+spawn -noecho ./getsetupinfo $setupfile "RS232 FLAG"
+expect -re "(\.*)(\r)";
+set serialflag $expect_out(1,string)
+send_user "SERIAL FLAG: $serialflag\n"
+
+if { $serialflag == 1 } {
+	send_user "OPEN RS232 at 38400\n"
+	spawn kerm232 38400
+} else {
+	spawn kermss
+}
+
+exit 0

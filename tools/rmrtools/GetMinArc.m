@@ -1,0 +1,1 @@
+function a = GetMinArc(a1,a2),%function a = GetMinArc(a1,a2)%Compute the smallest arc from angle a1 to angle a2%example: a1 = 234,  a2 = 34 => a = +160 %example: a1 = 20,  a2 = 340 => a = -40a = a2 - a1;if a < -180, a = a+360; endif a > 180, a = a - 360; endreturn	

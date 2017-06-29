@@ -1,0 +1,80 @@
+
+export PS1='\w/$ '
+export EDITOR="vi"
+alias Top="top -u -s5"
+alias Date='date -u "+%Y %m %d %H %M %S Z"'
+alias ll="ls -l"
+
+ 
+export DAQFOLDER="$DAQPATH/PRP"
+export DAQSWFOLDER="$DAQFOLDER/sw"
+
+alias gtdaq="cd $DAQSWFOLDER"
+
+echo $PATH | grep -q -s /opt/local/bin
+if [ $? -eq 1 ] ; then
+    PATH=$PATH\:/opt/local/bin\:/opt/local/sbin
+    export PATH
+fi
+
+echo $PATH | grep -q -s $DAQSWFOLDER
+if [ $? -eq 1 ] ; then
+    PATH=$PATH\:$DAQSWFOLDER\:.
+    export PATH
+fi
+
+	# SETUP FILE NAME
+export SETUPFILE=$DAQSWFOLDER"/setup/su.txt"
+
+# TEST CALLS
+alias I='cd $DAQSWFOLDER; 	kerm232 38400'
+alias I2='cd $DAQSWFOLDER; 	kerm232 `FindUSBPort 2` 9600'
+
+
+		# CHECK DATA
+prpavg () {
+	cd $DAQSWFOLDER;
+	xx=`LastDataFolder prp_avg`
+	tail -10 $xx
+}
+prpraw () {
+	cd $DAQSWFOLDER;
+	xx=`LastDataFolder prp_raw`
+	tail -f $xx
+}
+
+	# SCREEN
+alias isscreen='echo "CHECK FOR A SCREEN"; screen -ls'
+alias gtscreen='echo "GO TO SCREEN"; screen -S PRP -d -r'
+
+	# RUN CALLS
+alias G='cd $DAQSWFOLDER;  Z_prp `cat tmp`'
+
+		#START DATA COLLECTION
+Startprp () {
+	KillScreen;
+	cd $DAQSWFOLDER; ./PrepareForRun; export RUNSETUPFILE=`cat tmp`;
+	crontab $DAQSWFOLDER/tools/crontab_prp.txt
+	screen -S PRP -d -m -c $DAQSWFOLDER/tools/screenrc_prp.txt
+	screen -S PRP -p 1 -X stuff "G$(printf \\r)"
+	isscreen
+}
+
+	#STOP DATA COLLECTION SCREEN
+alias Stopprp="KillScreen; Stopcron; Cleanupprp;"
+
+	#START AND STOP CRONTAB
+alias Startcron="crontab $DAQSWFOLDER/tools/crontab_prp.txt"
+alias Stopcron="crontab -r"
+
+alias Help="less $DAQSWFOLDER/help.txt"
+
+#		PERL LIBRARY =============================
+export DAQLIB=$DAQSWFOLDER"/tools"
+export MYLIB=$DAQLIB
+
+	# KERMIT RC =====================
+echo "prompt k>>" > ~/.kermrc
+
+cd $DAQSWFOLDER
+

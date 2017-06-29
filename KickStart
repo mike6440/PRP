@@ -1,0 +1,21 @@
+#!/bin/bash
+# v2 - PRP jamstec
+
+DaqUpdate > /tmp/tmpchk
+chk=`cat /tmp/tmpdaq`
+echo "STATUS $chk"
+
+if [ $chk -eq 0 ] > /dev/null ; then
+	echo REBOOT
+#	KillScreen
+#	PrepareForRun 
+#	export RUNSETUPFILE=`cat tmp`;
+#	screen -S PRP -d -m -c $DAQFOLDER/tools/screenrc_prp.txt
+#	screen -S PRP -p 2 -X stuff "GF$(printf \\r)"
+#fi
+
+if [ $chk -eq 1 ] > /dev/null ; then
+echo DO NOTHING
+fi
+
+exit 0

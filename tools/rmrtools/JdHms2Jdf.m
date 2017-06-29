@@ -1,0 +1,1 @@
+function [t] = JdHms2Jdf(jd,hh,mm,ss);%JDHMS2JDF		compute f.p. jd from start of the year%			[t] = JdHms2Jdf(jd,hh,mm,ss);%Inputs:%	jd = modified julian day (year day) (integer);%  hh,mm,ss = hour, minute, and sec of the day.%  Reynolds, 970204t = fix(jd) + hh ./ 24 + mm ./ 1440 + ss ./ 86400;return;

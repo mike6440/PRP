@@ -1,0 +1,1 @@
+function [twcc] = windchill(tc,s);% WindChill			convert temperature nd wind speed to chill% 				[twcc] = windchill(tc,s)% input:  tc = temperature degC,    s = wind speed m/s% output:  windchill in degC% temps in degC%tc = [-20:1:0]';  % degF%s = 4;              % m/stwcc = 33 - (0.451757 .* sqrt(s) + 0.474677 - 0.04537116 .* s)...      .* (33 - tc);return

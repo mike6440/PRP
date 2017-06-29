@@ -1,0 +1,92 @@
+############ 
+#  PRP MAKEFILE
+#############
+
+# DEFINITIONS AND MACROS USED
+# program name
+MAIN    = PRP402
+PRPLIB = PRPLIB
+
+# .h files used by the main program
+# MAINH=peconic.h
+
+# .h files used by all other modules
+# FCNH=\tt8\apps\isar\lib\isarlib.h
+
+# list of object files to link
+OBJ=$(MAIN).r  $(PRPLIB).r
+#OBJ=$(MAIN).r
+
+# list of Onset libraries
+LIB=-ltt8 -lml16tt8 -lcl16tt8 -ltt8
+
+# Linker and srecord options for Application hex file (to be burned to FLASH)
+LNOPTSA =       +q -t -m +c 2000 +j 2c2000 +d 2c2000 +s 2000
+SROPTSA =       -p4000 -a3 -b2000
+
+# Compiler options
+CCOPTS  = -ps -mc -md -sm -bs -qq
+#################################################################
+all:    $(PRPLIB).r  $(MAIN).rhx    $(MAIN).ahx
+
+
+#### RAM VERSION
+# Linker and s-record options for Ram hex file (to be loaded to ram)
+LNOPTSR =       +q -m +c 2c2000 +j 2C2000 +s 2000 -g
+SROPTSR =       -p4000 -a3 -b2c2000
+$(MAIN).rhx: $(OBJ)
+	ln68 -o $*.run $(LNOPTSR) $(OBJ) $(LIB)
+	@srec68 $(SROPTSR) $*.run
+	@copy $*.m00 $*.rhx
+	@erase $*.m00
+     
+#### ROM VERSION
+$(MAIN).ahx: $(OBJ)
+	ln68 -o $*.app $(LNOPTSA) $(OBJ) $(LIB)
+	@srec68 $(SROPTSA) $*.app
+	@copy $*.m00 $*.ahx
+	@erase $*.m00
+
+### COMPILE ALL THE MODULES
+$(MAIN).r: $(MAIN).c
+	c68 $(CCOPTS) $(MAIN).c
+
+$(PRPLIB).r: $(PRPLIB).c
+	c68 $(CCOPTS) $(PRPLIB).c
+
+clean:
+#	@erase $(MAIN).app
+#	@erase $(MAIN).ahx
+#	@erase $(MAIN).sym
+#	@erase $(MAIN).run
+#	@erase $(MAIN).rhx
+#	@erase $(MAIN).dbg
+#	@erase $(MAIN).r
+#       @erase $(MAIN).dbg
+################################################################################
+#### Linker options
+# +c Start of code segment
+# +d Start of initialized data segment 
+#    (default, if not given, is right after code segment)
+# +j Top of stack
+# +s Stack size in hex
+# -g Generate debugger information
+# +q Quiet, don't list modules
+# -m Inhibit symbol override warnings
+# -t Generate ASCII symbol table file
+#
+#### S-Record generator options
+# -p rom size in kilobytes (large to generate only one s-record)  
+# -a Address field size 3 bytes
+# -b Hex Byte offset 
+
+#### Compiler options
+# -ps 16 bit integers 
+# -mc Large code model
+# -md Large data model
+# -sm Adds __C_MACROS__ definition
+# -bs Generate debugger information
+# -qq Inhibit compiler signon message
+
+
+

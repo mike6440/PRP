@@ -1,0 +1,29 @@
+#!/usr/bin/perl -X
+#CALL:
+#   FindUSBPort   =>> finds COM1
+#   FindUSBPort 1 =>> finds COM1
+#   FindUSBPort 2 =>> finds COM2 if available
+# returns nothing otherwise
+ 
+@w = `ls /dev/tty*PL* 2>/dev/null`;
+@x = `ls /dev/tty*USB* 2>/dev/null`;
+@y = `ls /dev/tty*usb* 2>/dev/null`;
+@w=(@y,@w,@x);
+if( $#ARGV<0 || ($#ARGV==0 && $ARGV[0]==1)){
+	if ( $#w < 0 ){
+		exit 1;
+	}else {
+		chomp($w[0]);
+		print"$w[0]";
+	}
+}
+elsif( $#ARGV==0 && $ARGV[0]==2){
+	if($#w <=0) {
+		exit 1; 
+	} else {
+		chomp($w[1]);
+		print"$w[1]";
+	}
+}
+
+exit 0;

@@ -1,0 +1,3 @@
+#!/usr/bin/perl -w
+foreach(@INC){print"$_\n"}
+exit 0;

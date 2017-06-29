@@ -1,0 +1,19 @@
+hardstatus alwayslastline
+hardstatus string '%{= kG}[ %{G}%H %{g}][%= %{=kw}%?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B}%Y-%m-%d %{W}%c %{g}]'
+
+# Default screens
+screen -t USER     	0
+screen -t G-I 	1
+
+#example of a command to start a process in a window.
+#works if called from outside
+#in this example we call GT in window 1.
+#  screen -S PRP -p 1 -X stuff "GT$(printf \\r)"
+
+startup_message off # Turn off the splash screen
+
+defscrollback 30000 # Use a 30000-line scrollback buffer
+
+##escape ^Bb # Instead of Control-a, make the escape/command character be Control-b
+
+##autodetach on # Autodetach session on hangup instead of terminating screen completely

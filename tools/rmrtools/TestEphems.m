@@ -1,0 +1,1 @@
+%TestEphems - clear% Yaphanklat = 40.8333; lon = -72.9833;yyyy = 1998;MM = 11;dd = 5;hrf = 21 + 42/60 + 58/3600;ApproxFlag = 0;[sh,z,a] = ephems(lat, lon, yyyy, MM, dd, hrf, ApproxFlag);fprintf('azimuth = %.1f\n',a);fprintf('elev = %.1f\n',90-z);

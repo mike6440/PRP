@@ -1,0 +1,179 @@
+#!/usr/bin/perl -w
+
+my @p;  # char-by-char array of data string
+my @d=();  # data array
+
+	# INPUT PACKET
+my $strin;
+$strin=shift();
+#$strin=`cat /tmp/pkt`;
+chomp($strin);
+	# DOES IT HAVE START AND END CHARS?
+my $i1=index($strin,'##');
+my $i2=index($strin,'##',$i1+2);
+if($i1<00 || ($i2-$i1)<60){exit 1}
+	# FIRST PACKET
+$strin = substr($strin,$i1,$i2);
+	# PACKET CHECKSUM
+my @w=split /\*/, $strin;
+my $str = substr($w[0],7);
+
+	# PACKET CHECKSUM
+$w[1]=substr($w[1],0,3);
+#print"test embedded check: $w[1]\n";
+
+#my @wc = unpack 'a' x length $w[1], $w[1];
+#my $chk=ord($wc[0])*256 + ord($wc[1])*16 + ord($wc[2]);
+
+	# COMPUTED FROM PACKET
+my $str1 = CheckSum($str);
+#print"test computed check: $str1\n";
+
+# @d = mode thead pitch1 roll1 az1 adc10 adc11 adc12 adc13 adc14 adc15 adc16 adc17 pitch2 roll2 az2 adc20 adc21 adc22 adc23 adc24 adc25 adc26 adc27
+#       0     1     2     3     4    5     6     7    8     9     10     11    12    13     14   15   16    17    18    19    20    21    22    23
+
+# shadow threshold g11 g12 g13 g14 g15 g16 g17 g21 g22 g23 g24 g25 g26 g27
+#   24      25     26  27  28  29  30  31  32  33  34  35  36  37  38  39 
+
+# s01 s02 ... s23  
+#  (40  41     62)   (63...85)  (86...108)  (109... 131)  (132...154) (155...177) (178...200)
+# 
+# Low mode # 0...23
+# High, no shadow # 0...39
+# High with shadow # 200
+
+my ($i,$j,$k,$m);
+my $x;
+
+if($w[1] eq $str1) {
+		# GOOD PACKET -- DECODE
+	print "##";
+	$i=0;
+		# MODE
+	$mode=1; if( $p[$i] =~ /L/i ) { $mode = 0}; push @d,$mode; 
+	$i++;
+	
+		# Thead, pitch, roll, az -- all two characters
+	$x = (ord($p[$i+1])-48)*64 + ord($p[$i])-48; 
+	push @d, $x/10 - 20;  $i+=2;
+	$x = (ord($p[$i+1])-48)*64 + ord($p[$i])-48; 
+	push @d, $x/50 - 40;  $i+=2;
+	$x = (ord($p[$i+1])-48)*64 + ord($p[$i])-48; 
+	push @d, $x/50-40;  $i+=2;
+	$x = (ord($p[$i+1])-48)*64 + ord($p[$i])-48; 
+	push @d, $x/10;  $i+=2;
+	printf"%d %.1f %.1f %.1f %.1f",$d[0],$d[1],$d[2],$d[3],$d[4];
+	
+		# ADC 0-7 START
+	for($k=0; $k<8; $k++) {
+		$x = (ord($p[$i+2])-48)*4096 + (ord($p[$i+1])-48)*64 + (ord($p[$i])-48); 
+		push @d, $x/100-500;  $i+=3;
+	}
+	$j=5;
+	printf" %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f",
+	$d[$j],$d[$j+1],$d[$j+2],$d[$j+3],$d[$j+4],$d[$j+5],$d[$j+6],$d[$j+7];
+	
+		# Pitch, roll, az -- all two characters
+	$x = (ord($p[$i+1])-48)*64 + ord($p[$i])-48; 
+	push @d, $x/50-40;  $i+=2;
+	$x = (ord($p[$i+1])-48)*64 + ord($p[$i])-48; 
+	push @d, $x/50-40;  $i+=2;
+	$x = (ord($p[$i+1])-48)*64 + ord($p[$i])-48; 
+	push @d, $x/10;  $i+=2;
+	printf" %.1f %.1f %.1f",$d[13],$d[14],$d[15];
+		# ADC 0-7 START
+	for($k=0; $k<8; $k++) {
+		$x = (ord($p[$i+2])-48)*4096 + (ord($p[$i+1])-48)*64 + (ord($p[$i])-48); 
+		push @d, $x/100-500;  $i+=3;
+	}
+	$j=16;
+	printf"  %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f",
+	$d[$j],$d[$j+1],$d[$j+2],$d[$j+3],$d[$j+4],$d[$j+5],$d[$j+6],$d[$j+7];
+	
+		#########
+		# HIGH MODE
+		#########
+	if($d[0]==1){		#print" H";
+			# shadow, threshold
+		$x = (ord($p[$i+1])-48)*64 + ord($p[$i])-48; 
+		push @d, $x/10;  $i+=2;
+		$x = (ord($p[$i+1])-48)*64 + ord($p[$i])-48; 
+		push @d, $x/10;  $i+=2;
+		printf" %.1f %.1f",$d[24],$d[25];
+		
+			# GLOBAL SWEEP VALUES - first horizon
+		for($k=0; $k<7; $k++) {
+			$x = (ord($p[$i+1])-48)*64 + ord($p[$i])-48; 
+			push @d, $x;  $i+=2;
+		}
+		$j=26;
+		printf" %.1f %.1f %.1f %.1f %.1f %.1f %.1f",
+		$d[$j],$d[$j+1],$d[$j+2],$d[$j+3],$d[$j+4],$d[$j+5],$d[$j+6];
+		
+			# GLOBAL SWEEP VALUES - second horizon
+		for($k=0; $k<7; $k++) {
+			$x = (ord($p[$i+1])-48)*64 + ord($p[$i])-48; 
+			push @d, $x;  $i+=2;
+		}
+		$j=33;
+		printf" %.1f %.1f %.1f %.1f %.1f %.1f %.1f",
+		$d[$j],$d[$j+1],$d[$j+2],$d[$j+3],$d[$j+4],$d[$j+5],$d[$j+6];
+		
+			# SWEEPS IF SHADOW > THRESHOLD
+		if($d[24]>$d[25]){
+			for($k=0; $k<7; $k++){
+				for($m=0; $m<23; $m++){
+					$x = (ord($p[$i+1])-48)*64 + ord($p[$i])-48; 
+					push @d, $x;  $i+=2;
+					printf" %d",$x;
+				}
+			}
+		}
+		print"##\n";
+	} else {
+		print"##\n";
+	}
+} 
+else {print "0\r\n"}
+
+exit 0;
+
+
+#==========================================================
+sub CheckSum
+{
+	# CheckSum() --
+	# 	Routine to compute checksum based on a shifting summation of all
+	# 	bytes.  Routine provided by L. Hatfield of Battelle, 9404.
+	# 	See Reynolds notes, pp 1207-1208.			940505
+	# 	Modified for binary blocks of size N.		990108
+	
+	my $packet = shift();
+	#print"packet: $packet\n";
+	my ($nbyte, $sum, $chr);
+
+	$nbyte=0;  $sum=0;
+	@p = unpack 'a' x length $packet, $packet;
+
+	# COMPUTE SHIFTED CHECKSUM
+	while($nbyte <= $#p) {
+		$chr = ord($p[$nbyte]);
+		#print"nbyte=$nbyte,  chr=$p[$nbyte]=$chr\n";
+		$nbyte++;
+		if($sum & 01) { $sum = ($sum>>1) + 0x8000}
+		else { $sum >>= 1 }
+
+		$sum += $chr;
+		$sum &= 0xFFFF;	# truncate to 16 bits
+	}
+	
+	my $b1 = $sum; 
+	my $c1 = $b1 % 64 + 48;  	# msb
+	my $b2 = $b1 / 64;
+	my $c2 = $b2 % 64 + 48;	 
+	my $b3 = $b2 / 64;
+	my $c3 = $b3 % 64 + 48;
+	my $str = chr($c1).chr($c2).chr($c3);
+	return $str;
+}
+

@@ -1,0 +1,44 @@
+#!/usr/bin/perl -X
+#   ./LastAvg rad_avg (or 'gps_avg', 'wxt_raw', etc)
+
+#CALL
+#	LastDataTime prp_raw
+#		
+
+
+#v2 -- what is there is no valid data record
+#$WIPRR,20150804T150652Z,0,40.2,0.0,10,84.05,399.14,1.13,18.20,18.31,6.8,9.4,89.8,13.8*6A
+# A valid record has ISO time in the second field. 
+
+use lib $ENV{MYLIB};
+use perltools::MRtime;
+use perltools::MRutilities;
+
+my $a = shift();
+
+my $s = `LastDataRecord $a`;
+chomp $s;
+	# BAD CALL OR NO TIME AVAIL
+if($s eq '0'){
+	print"0";
+	exit 1;
+} 
+
+
+$s =~ s/^\s+//;  # remove leading blanks
+my $recno;  
+my $dt;
+
+
+my @w = split/[, ]+/,$s;
+#$i=0; foreach(@w){printf" $i  %s\n",$w[$i]; $i++}
+
+$dt=dtstr2dt($w[1]);
+if($dt==0){
+	#print"bad record, no time\n";
+	print"0";
+}else{
+	@w=datevec($dt);
+	print"0 $dt $w[0] $w[1] $w[2] $w[3] $w[4] $w[5]\n";
+}
+exit 0;

@@ -1,0 +1,283 @@
+#!/usr/bin/expect --
+
+# CALLING
+#       Z_prp.ex setupfile
+#       Z_prp.ex `cat tmp`
+
+set PROGRAMNAME Z_prp.ex
+set VERSION v11
+set EDITDATE 150802
+
+# 
+#v9 -- trying to fix the 232 pipe problem
+#v10 -- com2 development
+#v11 -- day0 error 
+
+log_user 0  ;# 0-quiet, 1=verbose
+
+
+global PRP PRPPID PRPAV PRPAVPID  Finfo  Fraw setupfile  COM2 COM2PID
+
+
+#========================================================
+		# PROCEDURE TO CONNECT TO PRP (COM1) v3
+#============================================================
+proc SpawnPrp { } {
+	global PRP PRPPID
+		# Find the USB port
+	set usbport [exec perl FindUSBPort]
+		# START PROCESS -- KERMIT FOR RS232
+	set PRPPID [spawn kermit]
+	set PRP $spawn_id
+	set timeout 2
+	expect {
+		timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
+		">>"
+	}
+	write_info "SPAWN PRP KERMIT, spawn_id = $PRP,  pid = $PRPPID"
+		# OPEN line
+	send "set line $usbport\r"
+	expect ">>"
+	write_info "RS232 CONNECT TO $usbport"
+		# speed
+	send "set speed 38400\r"
+	expect ">>"
+		# duplex
+	send "set duplex half\r"
+	expect ">>"
+		# flow control
+	send "set flow none\r"
+	expect ">>"
+		# carrier watch
+	send "set carrier-watch off\r"
+	expect ">>"
+	## CONNECT 
+	send "connect\r"
+	expect {
+		"Conn*---" { write_info "SERIAL CONNECTED TO $usbport"; }  
+		timeout {send_user "PRP SERIAL TIMEOUT, NO CONNECT"; exit 1}
+	}
+}
+
+#========================================================
+		# RS232 COM2
+#============================================================
+proc SpawnCom2 { } {
+	global COM2 COM2PID
+		# Find the USB port
+	set usbport [exec perl FindUSBPort 2]
+		# NO COM2 PORT
+	if { [string length $usbport] < 3 } { 
+		send_user "COM2 MISSING\n";
+		set COM2PID 0
+		set COM2 0
+	} else {
+			# START PROCESS -- KERMIT FOR RS232
+		set COM2PID [spawn kermit]
+		set COM2 $spawn_id
+		set timeout 2
+		expect {
+			timeout {"COM2 KERMIT FAILS TO OPEN\n"; exit 1}
+			">>"
+		}
+		write_info "SPAWN COM2 KERMIT, spawn_id = $COM2,  pid = $COM2PID"
+			# OPEN line
+		send "set line $usbport\r"
+		expect ">>"
+		write_info "RS232 CONNECT TO $usbport"
+			# speed
+		send "set speed 9600\r"
+		expect ">>"
+			# duplex
+		send "set duplex full\r"
+		expect ">>"
+			# flow control
+		send "set flow none\r"
+		expect ">>"
+			# carrier watch
+		send "set carrier-watch off\r"
+		expect ">>"
+			# carrier watch
+		send "set file type binary\r"
+		expect ">>"
+		## CONNECT 
+		send "connect\r"
+		expect {
+			"Conn*---" { write_info "COM2 CONNECTED TO $usbport"; }  
+			timeout {send_user "COM2 SERIAL TIMEOUT, NO CONNECT"; exit 1}
+		}
+	}
+}
+
+#========================================================
+		# SEND COM2
+#============================================================
+proc SendCom2 { str } {
+	global COM2 COM2PID
+	if {$COM2 == 0} {
+		send_user "com2: $str\n";
+	} else {
+		#set oldid $spawn_id
+		#set spawn_id $COM2
+		send -i $COM2 "$str\r\n";
+	}
+}
+
+
+#======================================
+#   PROCEDURE TO START AVGPRP PROGRAM
+#==================================
+proc SpawnAvgPrp {  } {
+	global PRPAV PRPAVPID setupfile
+	
+	set PRPAVPID [spawn perl avgprp $setupfile]
+	set PRPAV $spawn_id
+	write_info "SPAWN AVGPRP spawn_id = $PRPAV, pid = $PRPAVPID"
+			# PROGRAM REPLY
+	expect {
+		eof {
+			send_user "AVGPRP STARTUP, eof\n"
+			exit 1
+		}
+		"PRP--" {
+			send_user "AVGPRP is ready, spawn_id=$PRPAV,  pid = $PRPAVPID\n"
+		}
+	}
+}
+
+#====================================================================
+# PROCEDURE WRITE_INFO
+# input
+#  fname = fullfile name towrite the info string
+#  str=the string to write
+#=============
+proc write_info {str} {
+	global Finfo;
+	
+	set tm [timestamp -format "%y%m%d,%H%M%S"]
+	set str "$tm,$str";
+	puts $Finfo "$str" 
+	return $str
+}
+#==================== END PROCEDURES =============================================
+
+
+send_user "$PROGRAMNAME, $VERSION\n";
+
+	# SETUP FILE DEFINED
+set setupfile [exec cat tmp]
+send_user "setupfile $setupfile\n";
+
+	# SEE IF THE SETUP FILE EXISTS
+if [catch {open $setupfile} sufile] {
+	puts "Setup file open fails, exit 1"
+	exit 1
+}
+
+	# DATAPATH
+spawn -noecho getsetupinfo $setupfile "RT OUT PATH"
+expect -re "(\.*)(\r)";
+set datapath $expect_out(1,string)
+
+# OPEN INFO FILE
+set infoname "$datapath/prp_info.txt";
+set Finfo [open $infoname a];
+
+		# HEADER FILE
+set tm [timestamp -format "%y%m%d%H%M%S"];
+set str  "PROGRAM $PROGRAMNAME, Version $VERSION, Editdate $EDITDATE, Runtime [timestamp -format "%Y%m%d,%H%M%S"]"
+write_info $str 
+write_info "RT OUT PATH: $datapath"
+
+		# OPEN SERIAL CONNECTION
+SpawnPrp;
+		# START AVG PROGRAM
+SpawnAvgPrp; 
+		# OPEN COM2
+SpawnCom2;
+
+
+set force_rsr_standby  0   ;# start in operation mode
+set ktemp 1                ;# start with temp standby flag in operate mode.
+set rsrcmd 1				;# commands to high mode
+set rsrmode 0				;# defines the operation mode  
+# send -i $PRP "H"           ;# at program start up we start the FRSR in High.
+
+# =====================
+# MAIN LOOP
+#======================
+set timeraw [timestamp -gmt]
+		# COUNT GOOD RAW RECORDS
+set day0 0 ;# to initiate the first raw file
+set Nrecs 0
+
+SendCom2  "Main Loop 1029";
+	# START LOOP
+while 1 {
+	set dt [timestamp -gmt]
+		# NEW DAY
+	set day1 [timestamp -gmt -format "%j"]
+	if { $day1 != $day0 } {
+		set day0 $day1
+			# OPEN NEW RAW FILE
+		set fname [timestamp -gmt -format "%y%m%d"]
+		set rawname "$datapath/prpraw_$fname.txt";
+		send_user "New day, file $rawname\n";
+	}
+	#===================================
+	# EXPECT
+	#===================================
+	set timeout 10
+	expect -i $PRP *
+	expect { 
+		-i $PRP  
+		"##*##" {
+			set rawstr $expect_out(0,string);
+			set datstr [exec DecodePacket $rawstr]
+# 			set P [open /tmp/pkt w 0600];
+# 			puts $P $datstr;
+# 			close $P;
+			set strx [timestamp -gmt -format "%Y%m%dT%H%M%SZ "]$rawstr
+
+					# SAVE TO RAW FILE
+			set F [open $rawname a 0600]
+			puts $F $strx
+			close $F;
+					# SEND RAW TO AVG AND RCV RESPONSE
+			set spawn_id $PRPAV
+			send "$datstr\r\n"
+		}
+		timeout {send_user "timeout1\n"}
+	}
+	set timeout 1
+	set spawn_id $PRPAV
+	expect {
+		-re (\\\$WIPRR.*?\\*..).*(\\\$WIPRG.*?\\*..).*(\\\$WIPR1.*?\\*..).*(\\\$WIPR2.*?\\*..).*(\\\$WIPR3.*?\\*..).*(\\\$WIPR4.*?\\*..).*(\\\$WIPR5.*?\\*..).*(\\\$WIPR6.*?\\*..).*(\\\$WIPR7.*?\\*..).* { 
+			set str $expect_out(1,string)
+			send_user "$str HiShad\n";
+			SendCom2 $str
+			SendCom2 $expect_out(2,string)
+			send_user "$expect_out(2,string)\n";
+			SendCom2 $expect_out(3,string)
+			SendCom2 $expect_out(4,string)
+			SendCom2 $expect_out(5,string)
+			SendCom2 $expect_out(6,string)
+			SendCom2 $expect_out(7,string)
+			SendCom2 $expect_out(8,string)
+			SendCom2 $expect_out(9,string)
+		}
+		-re (\\\$WIPRR.*?\\*..).*(\\\$WIPRG.*?\\*..) { 
+			set str $expect_out(1,string)
+			send_user "$str HiNoShad\n";
+			SendCom2 $str
+			SendCom2 $expect_out(2,string)
+			send_user "$expect_out(2,string)\n";
+		}
+		-re (\\\$WIPRR.*?\\*..) {
+			set str $expect_out(1,string)
+			send_user "$str Low\n";
+			SendCom2 $str
+		}
+		timeout {send_user "timeout2\n"}
+	}
+}

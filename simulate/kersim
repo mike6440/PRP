@@ -1,0 +1,8 @@
+#!/usr/local/bin/kermit +
+
+for \%i 1 1 1 {
+	run GetSimRec \%i;
+	transmit /tmp/prp;
+	pause 6;
+};
+connect

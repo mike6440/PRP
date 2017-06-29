@@ -1,0 +1,19 @@
+#!/usr/bin/perl -w
+
+my $i= $ARGV[0];
+my $n=0;
+open F, "prp.txt" or die;
+while(<F>){
+	chomp($str=$_);
+	$n++;
+	print"Record $n\n";
+	if($n >= $i){
+		#print"$str\n";
+		open X,">/tmp/prp";
+		print X "$str\r\n";
+		close X;
+		last;
+	}
+}
+close F;
+exit;

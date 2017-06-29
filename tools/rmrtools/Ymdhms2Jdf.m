@@ -1,0 +1,1 @@
+function [t] = Ymdhms2jdf(yyyy,MM,dd,hh,mm,ss);%YMDHMS2JDF		compute f.p. jd from start of the year%			[t] = Ymdhms2jdf(yyyy,MM,dd,hh,mm,ss);%Inputs:%yyyy = year, e.g. 1997;%MM, dd, hh,mm,ss month, day, hour, min, sec.%  Reynolds, 970204jd = julianday(yyyy,MM,dd) - julianday(yyyy,1,1) + 1;t = fix(jd) + hh ./ 24 + mm ./ 1440 + ss ./ 86400;return;

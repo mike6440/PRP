@@ -1,0 +1,149 @@
+	THIS FILE NAME: su.txt
+	Editdate: 2015,08,04 -- prp11 upgrade
+
+
+   		Data collection PC
+RS232 FLAG: 1
+
+	DATA FILES -----SET BY THE START COMMAND
+    This file will be set with the START command.
+RT OUT PATH: ../data
+
+========= EXPERIMENT =========================
+EXPERIMENT NAME: PRP 11
+GEOGRAPHIC LOCATION: RMR CO
+PLATFORM NAME: MIRAI
+LOCATION ON PLATFORM: Rail
+HEIGHT ABOVE SEA LEVEL M: 30
+
+========== CALIBRATION INFO FILE ==================
+PRP CALIBRATION INFORMATION FILE -- created: 1506
+LAST EDIT: 150804
+CALIBRATION NAME: 1506
+DATA POINT OF CONTACT: R. M. Reynolds
+POC ADDRESS: RMRCO, 214 Euclid Av., Sea WA 98122
+POC EMAIL: michael@rmrco.com
+PRP SERIAL NUMBER: 11
+FILE NAME: INFO_11_1506.txt
+DOCUMENTS: Cal_11_1506.pdf
+HEAD SERIAL NUMBER: 492
+HEAD CALIBRATION ID: 1506
+DATALOGGER SERIAL NUMBER: dl00_4
+DATALOGGER CALIBRATION ID: 1506
+PSP SERIAL NUMBER: 33401F3
+PSP CALIBRATION ID: 1506
+PIR SERIAL NUMBER: 33400F3
+PIR THERMOPILE CALIBRATION ID: 1506
+PIR TEMPERATURE CALIBRATION ID: none
+COMMENTS: Calibration after refurbish:
+  Head cal by Craig Webb at ARM Oklahoma facility.
+  PSP cal by Eppley. 7.88
+  PIR cal by Eppley. 3.94
+  Logger cal at RMR Co  Julie Lab volt-a-vider.
+    we repeated the cal on 7/28 with the same results.
+  We are using the new software with 38400 bps serial.
+END
+
+%================== PRPRX =============================================
+% CALIBRATION FILE FOR PRPRX DATA COLLECTION SOFTWARE
+% DATALOGGER SERIAL NUMBER: dl00_4
+% PSP CALIBRATION, PSP SN: 33401F3
+3.7023     9.703
+% PIR CALIBRATION, PIR SN: 33400F3
+1.211  -13.253
+% TCASE FIT
+4.95398e-05    -0.000778906     0.00434495    -0.00514119
+% TDOME FIT
+5.3161e-05    -0.000837913     0.00466245    -0.00570592
+% K COEFFICIANT
+4.0
+% SIGMA
+5.67e-8
+% EPSILON
+0.98
+% BATTERY
+0.030820 0.0
+% RCASE RDOME -- Thermistor resistors to ground
+ 268490.00    268430.00
+% Rvref1  Rvref2 for 12adc Ref voltage measured on 18adc
+       NaN         NaN
+% HEAD CALIBRATION CONSTANTS, MFR HEAD SN: 492
+  3.0316e-04    1.5977e-05
+  5.4309e-04    1.3759e-02
+  7.1443e-04    5.8498e-03
+  5.5617e-04    3.7816e-03
+  4.2251e-04    2.4860e-03
+  2.5278e-04    1.2717e-03
+  1.2695e-04    8.0114e-04
+% DETECTOR BAND CENTER WAVELENGTHS (nm)
+413.48, 495.54, 612.40, 671.55, 869.22, 939.05
+% PASS BAND AND TOA IRRADIANCE, TOA_simbios492_1506.dat
+%   WAVELENGTH (nm)         IRRADIANCE (W/m^2/nm)
+% LOWER  CENTER  UPPER     LOWER   MEAN    UPPER
+390, 413, 435,          1.685, 1.719, 1.753
+480, 496, 525,          1.926, 1.966, 2.005
+590, 612, 635,          1.642, 1.676, 1.709
+645, 672, 695,          1.476, 1.506, 1.536
+830, 869, 900,          0.932, 0.951, 0.970
+900, 939, 970,          0.807, 0.823, 0.840
+
+========= CONFIGURATION =======================
+FIXED TILT FLAG: 0
+TCM FIXED PITCH: 0.1;
+TCM FIXED ROLL: -0.1
+TCM FIXED HEADING: 12
+
+TCM PITCH CORRECTION: 8.8
+TCM ROLL CORRECTION: 11.4
+TCM HEADING CORRECTION: 0.0
+
+
+PRP COMMENTS:
+  1506 -- upgrade from PRPRX to DAQ
+END
+
+
+		------- DATA ACQUISITION PROGRAM PARAMETERS -------------------------------	
+MISSING VALUE: -999
+
+GPS FIXED FLAG:1
+GPS FIXED LATITUDE:47.60329
+GPS FIXED LONGITUDE:-122.28797
+GPS FIXED VARIATION:18.1
+
+
+===================
+ PRP SETUP
+===================
+HEAD ZE CAL FILE: setup/374.sol
+FRSR CAL FILE: setup/prprx_201_1212.txt
+PRP INFO FILE: setup/INFO_201_1212.txt
+
+		Defines a two-min averaging time for all sweeps.
+PRP AVERAGING TIME SECS: 120
+		The FRSR computer produces 23 bins for the 250 samples
+PRP SWEEP BLOCKS: 23
+		There are seven channels
+PRP CHANNELS: 7
+
+PRP DEAD TIME ALARM: 600
+
+		## SHUTDOWN CONTROL ##
+		0=no action, 1=shutdown control is on.
+PRP SHUTDOWN CONTROL: 0
+		Select channel 0-6, 0=broadband Si
+PRP SHUTDOWN CHANNEL: 0
+		A level of 10 is about first light. 25 is still low light. A level of 100 is bright sun.
+PRP SHUTDOWN THRESHOLD: 100
+		Low temperature. The PRP.ex program reads the averaged data from the 
+		TCM tilt/compass sensor. If the temperature is below the standby
+		limit below it puts the system into standby until the temperature rises
+		above the limit. Hysterisis is built in.
+LOW TEMPERATURE STANDBY: -5
+		SHADOW RATIO THRESHOLD
+		You can set the shadow ratio threshold so only well defined
+		shadows are processed.
+PRP SHADOW THRESHOLD: 10
+
+
+END SETUP FILE

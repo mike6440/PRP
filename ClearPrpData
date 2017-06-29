@@ -1,0 +1,46 @@
+#!/usr/bin/perl -w
+
+#  1. Call after 'Stopprp'
+#		and
+#  2. ArchivePrp
+#
+#  Wipes clean the PRP/data folder
+#    Asks permission before
+#  
+#  Call:  perl ClearPrpData
+#  
+#  Output: none
+# 
+
+use lib $ENV{MYLIB};
+use perltools::MRutilities;
+use perltools::MRtime;
+
+	## DATA PATH
+my $datapath="$ENV{HOME}/swmain/apps/PRP/data";
+print"data path = $datapath\n";
+
+print"
+=========================
+   WARNING
+=========================
+This process will delete everything from the PRP/data folder.
+Command \"ArchivePrp\" should be used to backup all collected data.
+
+Proceed to delete?  (y or n): ";
+
+my $ans=<>;
+chomp($ans);
+print"You entered $ans\n";
+
+if($ans =~ /y/i){
+	print"Delete data\n";
+	my $cmd="rm -r $datapath/*";
+	#print"cmd=$cmd\n";
+	system $cmd;
+} else {
+	print"No delete.\n";
+}
+
+exit 0;
+
