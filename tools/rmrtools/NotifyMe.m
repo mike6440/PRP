@@ -1,1 +1,0 @@
-function NotifyMefor i=1:10	sound(1,4000);	pause(.1)endreturn

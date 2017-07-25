@@ -1,11 +1,10 @@
-
+# edit 20170725T134714Z
 export PS1='\w/$ '
 export EDITOR="vi"
 alias Top="top -u -s5"
 alias Date='date -u "+%Y %m %d %H %M %S Z"'
 alias ll="ls -l"
 
- 
 export DAQFOLDER="$DAQPATH/PRP"
 export DAQSWFOLDER="$DAQFOLDER/sw"
 
@@ -29,7 +28,6 @@ export SETUPFILE=$DAQSWFOLDER"/setup/su.txt"
 # TEST CALLS
 alias I='cd $DAQSWFOLDER; 	kerm232 38400'
 alias I2='cd $DAQSWFOLDER; 	kerm232 `FindUSBPort 2` 9600'
-
 
 		# CHECK DATA
 prpavg () {

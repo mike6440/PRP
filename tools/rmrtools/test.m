@@ -1,1 +1,0 @@
-%testlat=32; lon=-111;t0 = datenum(2001,6,21,7,0,0);t = t0 + [0:1439]'/1440;[az,ze,ze0]=ephem(lat,lon,t);viewseries(t,az,ze);

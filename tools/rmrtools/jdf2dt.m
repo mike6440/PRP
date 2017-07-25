@@ -1,1 +1,0 @@
-function dt = jdf2dt(yyyy,jdf)%JDF2DT -- convert year and float jd to datenum% dt = jdf2dt(yyyy,jdf);%==========================================================%reynolds 981021%==========================================================t0 = datenum(yyyy,1,1);dt = t0 + jdf - 1;return

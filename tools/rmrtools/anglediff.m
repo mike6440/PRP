@@ -1,1 +1,0 @@
-function ang = anglediff(wd1, wd2)% ang = anglediff(wd1, wd2) smallest arc diff between two angles%input%  wd1, wd2 = compass angles scalar or vector.wd1 = CompassCheck(wd1);wd2 = CompassCheck(wd2);ang = wd2 - wd1;ix = find(ang > 180);if length(ix) > 0, ang(ix) = ang(ix) - 360; endix = find(ang < -180);if length(ix) > 0, ang(ix) = 360 + ang(ix); endreturn;
