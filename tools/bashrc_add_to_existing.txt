@@ -7,7 +7,6 @@
 export PS1='\w/$ '
 
 export DAQ="PRP"
-#export DAQPATH="$HOME/Dropbox/swmain/apps"
 [ -d $HOME/Dropbox ] \
 	&& export DAQPATH="$HOME/Dropbox/swmain/apps" \
 	|| export DAQPATH="$HOME/swmain/apps"
@@ -19,6 +18,12 @@ fi
 
     # KERMIT RC =====================
 echo "prompt k>>" > ~/.kermrc
+
+   # VIMRC
+#echo "source $HOME/Dropbox/swmain/vim/myvimrc" > ~/.vimrc
+[ -d $HOME/Dropbox ] \
+	&& echo "source $HOME/Dropbox/swmain/vim/myvimrc" > $HOME/.vimrc \
+	|| echo "source $HOME/swmain/vim/myvimrc" > $HOME/.vimrc
 
     # PERL LIBRARY =============================
 [ -d $HOME/Dropbox ] \

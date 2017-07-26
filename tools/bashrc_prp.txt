@@ -68,8 +68,7 @@ alias Stopcron="crontab -r"
 alias Help="less $DAQSWFOLDER/help.txt"
 
 #		PERL LIBRARY =============================
-export DAQLIB=$DAQSWFOLDER"/tools"
-export MYLIB=$DAQLIB
+export DAQLIB=$MYLIB
 
 	# KERMIT RC =====================
 echo "prompt k>>" > ~/.kermrc
