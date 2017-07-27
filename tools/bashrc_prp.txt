@@ -70,8 +70,5 @@ alias Help="less $DAQSWFOLDER/help.txt"
 #		PERL LIBRARY =============================
 export DAQLIB=$MYLIB
 
-	# KERMIT RC =====================
-echo "prompt k>>" > ~/.kermrc
-
 cd $DAQSWFOLDER
 
