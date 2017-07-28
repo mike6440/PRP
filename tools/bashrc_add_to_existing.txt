@@ -4,6 +4,11 @@
 #==========================================================
     # DEFINE THE DAQ SYSTEM: PRP or NONE
 #==========================================================
+# HomePath="/Users/rmr"
+[ -d $HOME/Dropbox ] \
+	&& export HomePath="$HOME/Dropbox" \
+	|| export HomePath="$HOME"
+
 export PS1='\w/$ '
 
 export DAQ="PRP"
