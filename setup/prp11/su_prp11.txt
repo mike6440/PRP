@@ -1,6 +1,8 @@
 # edit 20170725T141706Z -- prp11 upgrade
+
    	# Data collection PC
-RS232 FLAG: 1
+   	0 -- simulate   1 -- standard com1
+RS232 FLAG: 0
 	DATA FILES -----SET BY THE START COMMAND
     This file will be set with the START command.
 RT OUT PATH: ../data
@@ -8,6 +10,8 @@ RT OUT PATH: ../data
 	# You can set the shadow ratio threshold so only well defined
 	# shadows are processed.
 PRP SHADOW THRESHOLD: 10
+PRP SERIAL NUMBER: 11
+
 	# EXPERIMENT
 EXPERIMENT NAME: PRP 11
 GEOGRAPHIC LOCATION: JP
@@ -34,6 +38,7 @@ PRP COMMENTS:
   Head was not re-calibrated.
 END
 	# MFR CALIBRATION FILES
+HEAD SERIAL NUMBER: 492
 HEAD ZE CAL FILE: setup/prp11/492.sol.txt
 FRSR CAL FILE: setup/prp11/prprx_201_1212.txt
 PRP INFO FILE: setup/prp11/INFO_201_1212.txt

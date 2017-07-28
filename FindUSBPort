@@ -18,11 +18,11 @@ if( $#ARGV<0 || ($#ARGV==0 && $ARGV[0]==1)){
 	}
 }
 elsif( $#ARGV==0 && $ARGV[0]==2){
-	if($#w <=0) {
-		exit 1; 
+	if($#w <=0 ) {
+		print"0";
 	} else {
 		chomp($w[1]);
-		print"$w[1]";
+		print $w[1];
 	}
 }
 

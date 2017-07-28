@@ -16,7 +16,7 @@ $Nsweeps=0;
 #====================
 # PRE-DECLARE SUBROUTINES
 #====================
-use lib $ENV{DAQLIB};
+use lib $ENV{MYLIB};
 use perltools::MRtime;
 use perltools::MRstatistics;
 use perltools::MRutilities;
@@ -26,7 +26,6 @@ use perltools::MRradiation;
 #v0 => looks_like_number($w[0]) && $w[0]>=0 && $w[0]<=5 ? $w[0]*$slope0 + $offset0 : -999,
 
 my $setupfile = `cat tmp`;
-
 #print "SETUP FILE = $setupfile\n";
 
 
@@ -34,6 +33,7 @@ my $setupfile = `cat tmp`;
 # DEFINE OUT PATH
 my $datapath =  FindInfo($setupfile,'RT OUT PATH', ': ');
 if ( ! -d $datapath ) { print"!! RT OUT PATH - ERROR, $datapath\n"; die }
+#print"test datapath = $datapath\n";
 
 	# PSP CAL
 @x=FindLines($setupfile,"% PSP CALIBRATION",1);
@@ -75,13 +75,7 @@ else {
 	$headingcorrection = FindInfo($setupfile,"TCM HEADING CORRECTION");
 }
 
-
 $jdfold=0;
-#==============
-#	FILE NAMES
-#==============
-my $avginfofile= "$datapath/prpavg_info.txt";
-
 #----------------- HEADER ----------------
 $header = "PROGRAM: $PROGRAMNAME (Version $VERSION, Editdate $EDITDATE)
 RUN TIME: " . dtstr(now()) . " utc\n";
@@ -92,8 +86,8 @@ $header = $header."EXPERIMENT NAME: $str\n";
 $isarsn = FindInfo($setupfile,'PRP SERIAL NUMBER', ': ');
 $header = $header."PRP SERIAL NUMBER: $isarsn\n";
 
-$isarsn = FindInfo($setupfile,'HEAD SERIAL NUMBER', ': ');
-$header = $header."HEAD SERIAL NUMBER: $isarsn\n";
+$headsn = FindInfo($setupfile,'HEAD SERIAL NUMBER', ': ');
+$header = $header."HEAD SERIAL NUMBER: $headsn\n";
 
 $ShadowRatioThreshold = FindInfo($setupfile,'PRP SHADOW THRESHOLD', ':');
 $header = $header."PRP SHADOW THRESHOLD: $ShadowRatioThreshold\n";
@@ -127,11 +121,11 @@ if ( $#strings > 0 ){
 		if ( $strings[$i] =~ /^END/i ) {last}
 		else { $header = $header."$strings[$i]\n";}
 	}
-}
-
-	
+}	
 
 ## PRINT OUT THE HEADER
+my $avginfofile= "$datapath/prpavg_info.txt";
+printf"avginfofile = $avginfofile\n";
 open(HDR, ">>$avginfofile") or die;	
 print HDR "===============================================================================\n";
 print HDR "$header
@@ -171,7 +165,6 @@ High mode output
 10:global7, bin1,...bin11,bin12,... bin23, global1 for 940 nm in millivolts
 ========\n";
 close HDR;
-
 # ============ DATA PROCESSING PARAMETERS ===========
 $SampleFlag = 0;		# 0=standard   1=start at first sample time.
 
@@ -268,9 +261,6 @@ while ( 1 ) {
 	#=======================
 }
 exit(0);
-
-
-
 
 
 #*************************************************************/

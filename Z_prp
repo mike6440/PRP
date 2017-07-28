@@ -18,6 +18,16 @@ log_user 0  ;# 0-quiet, 1=verbose
 
 global PRP PRPPID PRPAV PRPAVPID  Finfo  Fraw setupfile  COM2 COM2PID
 
+#========================================================
+#		PROCEDURE TO SIMULATE PRP
+#========================================================
+proc SpawnPrpSimulate { } {
+	global PRP PRPPID
+		# Spawn simulate_prp
+	set PRPID [spawn perl simulate_prp]
+	set PRP $spawn_id
+	write_info "Spawn simulate_prp"
+}
 
 #========================================================
 		# PROCEDURE TO CONNECT TO PRP (COM1) v3
@@ -25,7 +35,7 @@ global PRP PRPPID PRPAV PRPAVPID  Finfo  Fraw setupfile  COM2 COM2PID
 proc SpawnPrp { } {
 	global PRP PRPPID
 		# Find the USB port
-	set usbport [exec perl FindUSBPort]
+	set usbport [exec perl FindUSBPort 1]
 		# START PROCESS -- KERMIT FOR RS232
 	set PRPPID [spawn kermit]
 	set PRP $spawn_id
@@ -108,7 +118,6 @@ proc SpawnCom2 { } {
 		}
 	}
 }
-
 #========================================================
 		# SEND COM2
 #============================================================
@@ -121,9 +130,8 @@ proc SendCom2 { str } {
 		#set spawn_id $COM2
 		send -i $COM2 "$str\r\n";
 	}
+	
 }
-
-
 #======================================
 #   PROCEDURE TO START AVGPRP PROGRAM
 #==================================
@@ -144,7 +152,6 @@ proc SpawnAvgPrp {  } {
 		}
 	}
 }
-
 #====================================================================
 # PROCEDURE WRITE_INFO
 # input
@@ -152,50 +159,51 @@ proc SpawnAvgPrp {  } {
 #  str=the string to write
 #=============
 proc write_info {str} {
-	global Finfo;
-	
+	global Finfo;	
 	set tm [timestamp -format "%y%m%d,%H%M%S"]
 	set str "$tm,$str";
 	puts $Finfo "$str" 
 	return $str
 }
 #==================== END PROCEDURES =============================================
-
-
 send_user "$PROGRAMNAME, $VERSION\n";
-
 	# SETUP FILE DEFINED
 set setupfile [exec cat tmp]
 send_user "setupfile $setupfile\n";
-
 	# SEE IF THE SETUP FILE EXISTS
 if [catch {open $setupfile} sufile] {
 	puts "Setup file open fails, exit 1"
 	exit 1
 }
-
 	# DATAPATH
 spawn -noecho getsetupinfo $setupfile "RT OUT PATH"
 expect -re "(\.*)(\r)";
 set datapath $expect_out(1,string)
-
-# OPEN INFO FILE
+	# OPEN INFO FILE
 set infoname "$datapath/prp_info.txt";
 set Finfo [open $infoname a];
 
-		# HEADER FILE
+	# HEADER FILE
 set tm [timestamp -format "%y%m%d%H%M%S"];
 set str  "PROGRAM $PROGRAMNAME, Version $VERSION, Editdate $EDITDATE, Runtime [timestamp -format "%Y%m%d,%H%M%S"]"
 write_info $str 
 write_info "RT OUT PATH: $datapath"
-
-		# OPEN SERIAL CONNECTION
-SpawnPrp;
-		# START AVG PROGRAM
+	# OPEN SERIAL CONNECTION
+spawn -noecho getsetupinfo $setupfile "RS232 FLAG"
+expect -re "(\.*)(\r)";
+set rs232flag $expect_out(1,string)
+send_user "RS232 FLAG = $rs232flag\n"
+if { $rs232flag == 0 } { 
+	send_user "SIMULATE_PRP\n";
+	SpawnPrpSimulate;
+} else {
+	send_user "STANDARD PRP SERIAL\n";
+	SpawnPrp;
+}
+	# START AVG PROGRAM
 SpawnAvgPrp; 
-		# OPEN COM2
+	# OPEN COM2
 SpawnCom2;
-
 
 set force_rsr_standby  0   ;# start in operation mode
 set ktemp 1                ;# start with temp standby flag in operate mode.
@@ -211,7 +219,7 @@ set timeraw [timestamp -gmt]
 set day0 0 ;# to initiate the first raw file
 set Nrecs 0
 
-SendCom2  "Main Loop 1029";
+SendCom2  "Main Loop";
 	# START LOOP
 while 1 {
 	set dt [timestamp -gmt]
