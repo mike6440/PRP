@@ -18,7 +18,7 @@ export DAQ="PRP"
 
 # PRP
 if expr $DAQ = "PRP" > /dev/null ; then 
-test -f $DAQPATH/PRP/tools/bashrc_prp.txt && . $_
+test -f $DAQPATH/PRP/sw/tools/bashrc_prp.txt && . $_
 fi
 # ISAR3
 if expr $DAQ = "ISAR3" > /dev/null ; then 
