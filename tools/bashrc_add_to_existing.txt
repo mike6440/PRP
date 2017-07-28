@@ -15,6 +15,14 @@ export DAQ="PRP"
 if expr $DAQ = "PRP" > /dev/null ; then 
 test -f $DAQPATH/PRP/tools/bashrc_prp.txt && . $_
 fi
+# ISAR3
+if expr $DAQ = "ISAR3" > /dev/null ; then 
+test -f $DAQPATH/ISAR3/sw/tools/bashrc_isar3.txt && . $_
+fi
+# ROSR
+if expr $DAQ = "ROSR" > /dev/null ; then
+test -f $DAQPATH/ROSR/sw/tools/bashrc_rosr.txt && . $_
+fi
 
     # KERMIT RC =====================
 echo "prompt k>>" > ~/.kermrc
