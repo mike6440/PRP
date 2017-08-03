@@ -17,7 +17,7 @@ use perltools::MRutilities;
 use perltools::MRtime;
 
 	## DATA PATH
-my $datapath="$ENV{HOME}/swmain/apps/PRP/data";
+my $datapath="$ENV{HomePath}/swmain/apps/PRP/data";
 print"data path = $datapath\n";
 
 print"

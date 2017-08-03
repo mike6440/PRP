@@ -1,45 +1,66 @@
 #!/usr/bin/perl -X
-
+# edit 20170802T151617Z
 
 	## RUN FROM THE DAQ sw folder
 	# PERLTOOL IN THE ~/sw/perl FOLDER
 use lib "$ENV{DAQLIB}";
 use perltools::MRtime;
+use perltools::MRutilities;
 
-		#=========================
-		# MAKE SURE THE CORRECT FOLDERS ARE IN PLACE
-		# IF NOT, THEN CREATE THEM
-		#========================
-		# DATA FOLDER
+	#=========================
+	# MAKE SURE THE CORRECT FOLDERS ARE IN PLACE
+	# IF NOT, THEN CREATE THEM
+	#========================
+	# DATA FOLDER
 $fndata0 = "$ENV{DAQDATAFOLDER}";
 if ( ! -d $fndata0 ) {
 	print"DATA FOLDER IS MISSING, STOP\n";
 	exit 1;
 }
+	#========================
+	# CREATE THE NEW DATA FOLDER FOR THIS RUN
+	#========================
 print"MAIN DATA FOLDER: $fndata0\n";
-
-		#========================
-		# CREATE THE NEW DATA FOLDER FOR THIS RUN
-		#========================
 my $dt0 = now();
 $fndata = sprintf "$fndata0/data_%s", dtstr($dt0,'iso');
 `mkdir $fndata`;
-print"RUN DATA FOLDER = $fndata\n";
-
-		#========================
-		# MOVE THE SETUP FILE INTO THIS FOLDER
-		#========================
-print"CURRENT SETUP FILE = $ENV{SETUPFILE}\n";
+print"DATA FOLDER = $fndata\n";
+	# =======================
+	# RUN TIME SU FILE
+	# =======================
+my $sutxt = $ENV{SETUPFILE};
+print"sutxt = $sutxt\n";
+my $prpsn = FindInfo($sutxt, "PRP SERIAL NUMBER");
+print"sn = $prpsn\n";
+	#su_isodate.txt
 $fsu = sprintf "%s/su_%s.txt", $fndata, dtstr($dt0,'iso');
-#print"RUN SETUP FILE =     $fsu\n";
-`cp $ENV{SETUPFILE} $fsu`;
+print"Run time su = $fsu\n";
+	# info
+my $dinfo = `find $ENV{DAQSWFOLDER}/setup -name *$prpsn* -type dir -print`;
+chomp $dinfo;
+print"dinfo = $dinfo\n";
+my $finfo=`find $dinfo -iname INFO*.txt -print`; chomp($finfo);
+print"finfo=$finfo\n";
+my $fprprx=`find $dinfo -iname prprx*.txt -print`; chomp($fprprx);
+print"fprprx=$fprprx\n";
+my $fsol=`find $dinfo -iname *sol*.txt -print`; chomp($fsol);
+print"fsol=$fsol\n";
+my $fspn=`find $dinfo -iname *spn*.txt -print`; chomp($fspn);
+print"fspn=$fspn\n";
 
-		#========================
-		# MODIFY THE SETUP FILE 
-		#  THIS FILE = $fsu
-		#perl -pi -e 's/: (.+)/: Mikes test/g if /^EXPERIMENT NAME/' tmp
-		#========================
-		# HEADER LINE
+	# su.txt to start
+`cp $ENV{SETUPFILE} $fsu`;
+	# INFO
+`cat $finfo >> $fsu`;
+`cat $fprprx >> $fsu`;
+#`cat $fspn >> $fsu`;
+#`cat $fsol >> $fsu`;
+	#========================
+	# MODIFY THE SETUP FILE 
+	#  THIS FILE = $fsu
+	#perl -pi -e 's/: (.+)/: Mikes test/g if /^EXPERIMENT NAME/' tmp
+	#========================
+	# HEADER LINE
 $cmd=sprintf "perl -pi -e 's!: (.+)!: %s!g if /^THIS FILE/' %s", $fsu, $fsu;
 #print"\ncmd = $cmd\n";
 system $cmd;
@@ -47,13 +68,10 @@ system $cmd;
 $cmd=sprintf "perl -pi -e 's!: (.+)!: %s!g if /^RT OUT PATH/' %s", $fndata, $fsu;
 #print"\ncmd = $cmd\n";
 system $cmd;
-
-
-		#========================
-		# setupfile -> tmp
-		#========================
+	#========================
+	# setupfile -> tmp
+	#========================
 open(F,'>tmp'); print F "$fsu\n"; close F;
-
 print"-->> SETUPFILE =     $fsu\n";
 
 exit

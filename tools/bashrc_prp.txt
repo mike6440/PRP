@@ -73,3 +73,5 @@ export DAQLIB=$MYLIB
 
 cd $DAQSWFOLDER
 
+alias suedit='vim $DAQSWFOLDER/setup/su.txt'
+

@@ -78,7 +78,7 @@ proc SpawnCom2 { } {
 	set usbport [exec perl FindUSBPort 2]
 		# NO COM2 PORT
 	if { [string length $usbport] < 3 } { 
-		send_user "COM2 MISSING\n";
+		send_user "com2: tty missing\n";
 		set COM2PID 0
 		set COM2 0
 	} else {
@@ -246,12 +246,14 @@ while 1 {
 # 			puts $P $datstr;
 # 			close $P;
 			set strx [timestamp -gmt -format "%Y%m%dT%H%M%SZ "]$rawstr
-
-					# SAVE TO RAW FILE
+			
+				# SAVE TO RAW FILE
 			set F [open $rawname a 0600]
 			puts $F $strx
 			close $F;
-					# SEND RAW TO AVG AND RCV RESPONSE
+				# SEND RAW TO AVG AND RCV RESPONSE
+			send_user "test $strx\n";
+			send_user "test $datstr\n";
 			set spawn_id $PRPAV
 			send "$datstr\r\n"
 		}

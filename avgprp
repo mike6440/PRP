@@ -367,14 +367,22 @@ sub ReadNextRecord
 		else {
 			$x=log($av[5]);
 			$y=$casecal[0]*$x*$x*$x + $casecal[1]*$x*$x + $casecal[2]*$x + $casecal[3];
-			$record{tcase} = 1/$y -273.15;
+			if($y<=0){
+				$record{tcase}=$missing;
+			}else{
+				$record{tcase} = 1/$y -273.15;
+			}
 		}
 			# T DOME
 		if($av[6]<=0){$record{dome}=$missing;}
 		else {
 			$x=log($av[6]);
 			$y=$domecal[0]*$x*$x*$x + $domecal[1]*$x*$x + $domecal[2]*$x + $domecal[3];
-			$record{tdome} = 1/$y -273.15;
+			if($y<=0){
+				$record{tdome}=$missing;
+			}else{
+				$record{tdome} = 1/$y -273.15;
+			}
 		}
 	
 		@x = ComputeLongwave($record{pir},$record{tcase},$record{tdome},$Kcoefficient,$sigma,$epsilon,$missing);
