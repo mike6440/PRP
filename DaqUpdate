@@ -5,37 +5,35 @@ use lib $ENV{MYLIB};
 use perltools::MRtime;
 use perltools::MRutilities;
 
-my @f = ('prp');
+my @f = ('prpraw');
 my @v = ();
+my ($f,$is,@s,$s,$cmd,$nw,$age);
 
-
-#printf"NOW = %d\n",now();
-
+$nw=now();
 	# SELECT STREAM
-
-my $is;
 for($is=0; $is<=$#f; $is++){
-	my $f=$f[$is];
-	print "$f  ";
+	$f=$f[$is];
+	printf "$f  %d  ",$nw;
 		# LAST RECORD TIME
-	my $cmd = sprintf("LastDataTime %s_raw",$f);
-	#print"cmd = $cmd\n";
-	my $s = `$cmd`;
+	$cmd = sprintf("LastDataTime %s",$f);
+	$s = `$cmd`;
 	chomp($s); 
-	my @s = split /[ ]+/, $s;
+		# 1502064482 2017 8 6 17 8 2
+	@s = split /[ ]+/, $s;
 	if($#s<=0){
 		print"bad -- record failure.\n";
 		push @v,0;
 	} else {
-		printf"   %d", $s[1];
+		$dt=$s[0];
+		printf"%s  %d  ",dtstr($dt,'short'),$dt;
 			# THE AGE OF THE RECORD
-		if($s[1]==0){
+		if($dt==0){
 			print"    0 -- RECORD FAILURE.\n",$f;
 			push @v,0;		
 		} else {
-			my $age = now() - $s[1];
+			$age = $nw - $dt;
 			print"    $age";
-			if ($age > 60){ print"    FAIL\n"; push @v,0}
+			if ($age > 600){ print"    FAIL\n"; push @v,0}
 			else{ print"    OK\n"; push @v, 1;  }
 		}
 	}
@@ -44,5 +42,4 @@ my $good=1;
 foreach(@v){if($_ == 0){$good=0}}
 print"good = $good\n";
 `echo $good > /tmp/tmpdaq`;
-
 exit 0

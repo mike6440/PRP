@@ -198,7 +198,7 @@ $dt=now();
 $jdold=int($jd[1]);
 @dt=datevec($dt);
 $avgoutfile=sprintf"$datapath/prp_avg_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
-$rawoutfile=sprintf"$datapath/prp_raw_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
+#$rawoutfile=sprintf"$datapath/prp_raw_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
 
 
 $Nsweeps=0;
@@ -227,7 +227,7 @@ while ( 1 ) {
 		#print"new day\n";
 		$avgoutfile=sprintf"$datapath/prp_avg_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
 		#print"New avg file $avgoutfile\n";
-		$rawoutfile=sprintf"$datapath/prp_raw_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
+		#$rawoutfile=sprintf"$datapath/prp_raw_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
 		#print"New raw file $rawoutfile\n";
 	}
 
@@ -404,8 +404,8 @@ sub ReadNextRecord
 		$timestamp,$record{mode},$record{thead},$record{shadow},$ShadowRatioThreshold,$record{sw},$record{lw},
 		$record{pir},$record{tcase},$record{tdome},$record{p},$record{r},$record{az},$record{batt};
 		$str=$str.NmeaChecksum($str);
-		open F,">>$rawoutfile";
-		print F "$str\n";
+		#open F,">>$rawoutfile";
+		#print F "$str\n";
 		print "$str\n";
 				# CHANGE INPUT TYPE -- HIGH TO LOW		
 		if ( $record{mode}==0 && $N_H > 0) {
@@ -452,7 +452,7 @@ sub ReadNextRecord
 			}
 			$str=$str."*";
 			$str=$str.NmeaChecksum($str);
-			print F "$str\n";		
+			#print F "$str\n";		
 			print "$str\n";
 			$N_H++;
 				
@@ -473,12 +473,12 @@ sub ReadNextRecord
 					}
 					$str=$str."*";
 					$str=$str.NmeaChecksum($str);
-					print F "$str\n";
+					#print F "$str\n";
 					print "$str\n";
 				}
 			}
 		}
-		close F;
+		#close F;
 		return (YES);
 	}
 }

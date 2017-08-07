@@ -5,13 +5,14 @@
 #       Z_prp.ex `cat tmp`
 
 set PROGRAMNAME Z_prp.ex
-set VERSION v11
-set EDITDATE 150802
+set VERSION v12
+set EDITDATE 170805
 
 # 
 #v9 -- trying to fix the 232 pipe problem
 #v10 -- com2 development
 #v11 -- day0 error 
+#v12 -- add simulate
 
 log_user 0  ;# 0-quiet, 1=verbose
 
@@ -19,7 +20,7 @@ log_user 0  ;# 0-quiet, 1=verbose
 global PRP PRPPID PRPAV PRPAVPID  Finfo  Fraw setupfile  COM2 COM2PID
 
 #========================================================
-#		PROCEDURE TO SIMULATE PRP
+#		PROCEDURE TO SIMULATE PRP -- v12
 #========================================================
 proc SpawnPrpSimulate { } {
 	global PRP PRPPID
@@ -28,7 +29,6 @@ proc SpawnPrpSimulate { } {
 	set PRP $spawn_id
 	write_info "Spawn simulate_prp"
 }
-
 #========================================================
 		# PROCEDURE TO CONNECT TO PRP (COM1) v3
 #============================================================
@@ -68,7 +68,6 @@ proc SpawnPrp { } {
 		timeout {send_user "PRP SERIAL TIMEOUT, NO CONNECT"; exit 1}
 	}
 }
-
 #========================================================
 		# RS232 COM2
 #============================================================
@@ -188,7 +187,7 @@ set tm [timestamp -format "%y%m%d%H%M%S"];
 set str  "PROGRAM $PROGRAMNAME, Version $VERSION, Editdate $EDITDATE, Runtime [timestamp -format "%Y%m%d,%H%M%S"]"
 write_info $str 
 write_info "RT OUT PATH: $datapath"
-	# OPEN SERIAL CONNECTION
+	# OPEN SERIAL CONNECTION - v12 include simulate
 spawn -noecho getsetupinfo $setupfile "RS232 FLAG"
 expect -re "(\.*)(\r)";
 set rs232flag $expect_out(1,string)
@@ -252,8 +251,6 @@ while 1 {
 			puts $F $strx
 			close $F;
 				# SEND RAW TO AVG AND RCV RESPONSE
-			send_user "test $strx\n";
-			send_user "test $datstr\n";
 			set spawn_id $PRPAV
 			send "$datstr\r\n"
 		}

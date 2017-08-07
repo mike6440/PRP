@@ -12,7 +12,7 @@
 			
 #v1 150629
 #v2 160211
-version="prp 160211"
+version="prp170806"
 #export DAQFOLDER="$HOME/swmain/apps/ISAR3"
 #export DAQSWFOLDER=$DAQFOLDER"/sw"
 #export DAQLIB=$DAQFOLDER"/tools"
@@ -26,7 +26,6 @@ version="prp 160211"
 #fi
 
 cd $DAQSWFOLDER
-
 echo $version" ====================" >> $DAQDATAFOLDER/daqlog;
 date -u "+%Y %m %d %H %M %S Z" >> $DAQDATAFOLDER/daqlog;
 
@@ -47,7 +46,7 @@ if [ $chk -eq 0 ] > /dev/null ; then
  	$DAQSWFOLDER/Cleanupprp >> $DAQDATAFOLDER/daqlog
 		# STARTPRP
 	$DAQSWFOLDER/PrepareForRun >> $DAQDATAFOLDER/daqlog
-	screen -S PRP -d -m -c $DAQFOLDER/tools/screenrc_prp.txt
+	screen -S PRP -d -m -c $DAQSWFOLDER/tools/screenrc_prp.txt
 		# START PROCESSES
 	screen -S PRP -p 1 -X stuff "bash$(printf \\r)"
 	screen -S PRP -p 1 -X stuff "G$(printf \\r)"
