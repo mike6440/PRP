@@ -123,7 +123,7 @@ proc SpawnCom2 { } {
 proc SendCom2 { str } {
 	global COM2 COM2PID
 	if {$COM2 == 0} {
-		send_user "com2: $str\n";
+		#send_user "com2: $str\n";
 	} else {
 		#set oldid $spawn_id
 		#set spawn_id $COM2

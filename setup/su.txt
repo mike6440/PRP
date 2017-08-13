@@ -1,7 +1,6 @@
-# edit 20170725T141706Z -- prp11 upgrade
-
+# edit 20170811T180425Z -- prp11 upgrade
    	# Data collection PC
-   	0 -- simulate   1 -- standard com1
+   	0 -- simulate   1 -- standard com, e.g. /dev/ttyUSB1
 RS232 FLAG: 0
 	DATA FILES -----SET BY THE START COMMAND
     This file will be set with the START command.
@@ -11,7 +10,6 @@ RT OUT PATH: ../data
 	# shadows are processed.
 PRP SHADOW THRESHOLD: 10
 PRP SERIAL NUMBER: 11
-
 	# EXPERIMENT
 EXPERIMENT NAME: PRP 11
 GEOGRAPHIC LOCATION: JP
@@ -38,10 +36,10 @@ PRP COMMENTS:
   Head was not re-calibrated.
 END
 	# MFR CALIBRATION FILES
+	#used in processing
 HEAD SERIAL NUMBER: 492
 HEAD ZE CAL FILE: setup/prp11/492.sol.txt
 FRSR CAL FILE: setup/prp11/prprx_201_1212.txt
-PRP INFO FILE: setup/prp11/INFO_201_1212.txt
 PRP CAL INFO: setup/prp11/INFO_11_1706.txt
 PRPRX FILE: setup/prp11/prprx_11_1706.txt
 MFR SOL FILE: setup/prp11/492.sol.txt
@@ -50,22 +48,10 @@ MFR SPN FILE: setup/prp11/492.spn.txt
 MISSING VALUE: -999
 	# Defines a two-min averaging time for all sweeps.
 PRP AVERAGING TIME SECS: 120
-	# The FRSR computer produces 23 bins for the 250 samples
-PRP SWEEP BLOCKS: 23
-	# There are seven channels
-PRP CHANNELS: 7
-	# OPERATION PARAMETERS
-PRP DEAD TIME ALARM: 600
-	## SHUTDOWN CONTROL ##
 	0=no action, 1=shutdown control is on.
 PRP SHUTDOWN CONTROL: 0
 	# Select channel 0-6, 0=broadband Si
 PRP SHUTDOWN CHANNEL: 0
 	# A level of 10 is about first light. 25 is still low light. A level of 100 is bright sun.
 PRP SHUTDOWN THRESHOLD: 100
-	# Low temperature. The PRP.ex program reads the averaged data from the 
-	# TCM tilt/compass sensor. If the temperature is below the standby
-	# limit below it puts the system into standby until the temperature rises
-	# above the limit. Hysterisis is built in.
-LOW TEMPERATURE STANDBY: -5
-END SETUP FILE
+	#----END SETUP FILE----
