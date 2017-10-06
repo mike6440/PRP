@@ -4,25 +4,36 @@
 # to do
 # Find the correct USB plug
 # 
-
-
 log_user 0
 # SETUP FILE DEFINED
-set setupfile [lindex $argv 0]
-
+if { [llength $argv] <= 0 } {
+		# empty command line
+	set setupfile [exec cat tmp]
+} else {
+		# command line
+	set setupfile [lindex $argv 0]
+}
+#send_user "$setupfile\n"
 ## SEE IF THE SETUP FILE EXISTS
 if [catch {open $setupfile} sufile] {
 	puts "Setup file open fails, exit 1"
 	exit 1
 }
-
+	# if simulate do nothing
+spawn -noecho ./getsetupinfo $setupfile "SIMULATEFLAG"
+expect -re "(\.*)(\r)";
+set simulateflag $expect_out(1,string)
+if { $simulateflag == 1 } {
+	send_user "SIMULATE\n"
+	exit 0;
+}
 	#==============
 	# SERIAL OR ETHERNET
 	#==============
 spawn -noecho ./getsetupinfo $setupfile "RS232 FLAG"
 expect -re "(\.*)(\r)";
 set serialflag $expect_out(1,string)
-send_user "SERIAL FLAG: $serialflag\n"
+send_user "RS232 FLAG: $serialflag\n"
 
 if { $serialflag == 1 } {
 	send_user "OPEN RS232 at 38400\n"

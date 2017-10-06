@@ -20,33 +20,33 @@ if ( ! -d $fndata0 ) {
 	#========================
 	# CREATE THE NEW DATA FOLDER FOR THIS RUN
 	#========================
-print"MAIN DATA FOLDER: $fndata0\n";
+#print"MAIN DATA FOLDER: $fndata0\n";
 my $dt0 = now();
 $fndata = sprintf "$fndata0/data_%s", dtstr($dt0,'iso');
 `mkdir $fndata`;
-print"DATA FOLDER = $fndata\n";
+#print"DATA FOLDER = $fndata\n";
 	# =======================
 	# RUN TIME SU FILE
 	# =======================
 my $sutxt = $ENV{SETUPFILE};
-print"sutxt = $sutxt\n";
+#print"sutxt = $sutxt\n";
 my $prpsn = FindInfo($sutxt, "PRP SERIAL NUMBER");
-print"sn = $prpsn\n";
+#print"sn = $prpsn\n";
 	#su_isodate.txt
 $fsu = sprintf "%s/su_%s.txt", $fndata, dtstr($dt0,'iso');
-print"Run time su = $fsu\n";
+#print"Run time su = $fsu\n";
 	# info
 my $dinfo = `find $ENV{DAQSWFOLDER}/setup -name *$prpsn* -type dir -print`;
 chomp $dinfo;
-print"dinfo = $dinfo\n";
+#print"dinfo = $dinfo\n";
 my $finfo=`find $dinfo -iname INFO*.txt -print`; chomp($finfo);
-print"finfo=$finfo\n";
+#print"finfo=$finfo\n";
 my $fprprx=`find $dinfo -iname prprx*.txt -print`; chomp($fprprx);
-print"fprprx=$fprprx\n";
+#print"fprprx=$fprprx\n";
 my $fsol=`find $dinfo -iname *sol*.txt -print`; chomp($fsol);
-print"fsol=$fsol\n";
+#print"fsol=$fsol\n";
 my $fspn=`find $dinfo -iname *spn*.txt -print`; chomp($fspn);
-print"fspn=$fspn\n";
+#print"fspn=$fspn\n";
 
 	# su.txt to start
 `cp $ENV{SETUPFILE} $fsu`;
@@ -72,7 +72,7 @@ system $cmd;
 	# setupfile -> tmp
 	#========================
 open(F,'>tmp'); print F "$fsu\n"; close F;
-print"-->> SETUPFILE =     $fsu\n";
+print"SETUPFILE  $fsu\n";
 
 exit
 

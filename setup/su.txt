@@ -1,9 +1,9 @@
-# edit 20170811T180425Z -- prp11 upgrade
-   	# Data collection PC
-   	0 -- simulate   1 -- standard com, e.g. /dev/ttyUSB1
+# edit 171006 -- prp11 upgrade
+   	# 1 -- simulate   0 -- standard com, e.g. /dev/ttyUSB1
+SIMULATEFLAG: 1
+    # 1 -- rs232      0 -- serial server
 RS232 FLAG: 0
-	DATA FILES -----SET BY THE START COMMAND
-    This file will be set with the START command.
+	# DATA FILES -----SET BY THE START COMMAND
 RT OUT PATH: ../data
 	# SHADOW RATIO THRESHOLD
 	# You can set the shadow ratio threshold so only well defined

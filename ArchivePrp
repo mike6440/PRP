@@ -14,12 +14,12 @@ use perltools::MRutilities;
 use perltools::MRtime;
 
 	## DATA PATH
-my $datapath="$ENV{HOME}/swmain/apps/PRP";
-print"data path = $datapath\n";
+my $datapath="$ENV{HomePath}/swmain/apps/PRP";
+#print"data path = $datapath\n";
 
 	## ARCHIVE PATH
-my $archivepath="$ENV{HOME}/prpdata";
-print"Archive path=$archivepath\n";
+my $archivepath="$ENV{HomePath}/prpdata";
+#print"Archive path=$archivepath\n";
 if(! -d $archivepath){
 	print"Create $archivepath\n";
 	`mkdir $archivepath`;
@@ -27,7 +27,7 @@ if(! -d $archivepath){
 
 	## TAR FILE NAME
 my $tarname=sprintf "prparchive_%s.tar.gz",dtstr(now(),'iso');
-print"tarname=$tarname\n";
+#print"tarname=$tarname\n";
 
 
 	## TAR COMMAND

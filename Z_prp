@@ -192,7 +192,11 @@ spawn -noecho getsetupinfo $setupfile "RS232 FLAG"
 expect -re "(\.*)(\r)";
 set rs232flag $expect_out(1,string)
 send_user "RS232 FLAG = $rs232flag\n"
-if { $rs232flag == 0 } { 
+	# SIMULATE
+spawn -noecho getsetupinfo $setupfile "SIMULATEFLAG"
+expect -re "(\.*)(\r)";
+set simulateflag $expect_out(1,string)
+if { $simulateflag == 1 } { 
 	send_user "SIMULATE_PRP\n";
 	SpawnPrpSimulate;
 } else {

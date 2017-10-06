@@ -8,22 +8,23 @@ chomp($usr);
 	#=================
 @removelist=("kermit","expect","perl");
 foreach $xx (@removelist){
-	$cmd="ps -u $usr -o pid,command | grep $xx";
+	$cmd="ps -u $usr -o pid,command | grep \"$xx\"";
 	#print"test0 cmd = $cmd\n";
 	@pslist = `$cmd`;
 	#$ii=0; foreach(@pslist){chomp($_); print"test1 $ii, $pslist[$ii]\n"; $ii++} 
 	foreach $pscmd (@pslist){
-		if($pscmd =~ /$xx/){
-			if( $pscmd !~ /Cleanupfrsr/){
-				chomp($pscmd);
-				$pscmd =~ s/^\s+//;
-				#print"test2 $pscmd\n";
-				@d=split/[ \t]+/,$pscmd;
-# 				#$ii=0; foreach(@d){print"$ii, $d[$ii]\n"; $ii++} 
-				$cmd="kill -9 $d[0] 2>/dev/null";
-				print"$pscmd -- $cmd\n";
-				`kill -9 $d[0] 2>/dev/null`;
-			}
+		chomp($pscmd);
+		if( $pscmd =~ /grep/){
+			#print"test 3 $pscmd\n";
+		} else {
+				# remove leading spaces
+			$pscmd =~ s/^\s+//;
+				# parse
+			@d=split/[ ]+/,$pscmd;
+			#$ii=0; foreach(@d){chomp($_); print"$ii, $d[$ii]\n"; $ii++} die;
+			$cmd="kill $d[0]";
+			print"$pscmd -- $cmd\n";
+			`$cmd`;
 		}
 	}
 }
