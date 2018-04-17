@@ -93,9 +93,9 @@ SSH FROM A REMOTE PC
                              Use "ifconfig" to determine 'xx'.
 
 
-               PRP OUTPUT RECORDS
-            ------------------------------
-LOW MODE
+               PRP OUTPUT FORMATS
+--------------------------------------------------
+FORMAT: LOW MODE 
 ##0063,LK9\MNNo8MN<Xd;ff?Lg?@=<g<<lPBl:G000039MN<fd;ff?Lg?>=<e<<lPBh:G*D64##
 --------------------------------------------------
 0063 -- number of bytes in the message
@@ -103,7 +103,8 @@ L -- Low mode
 K9...:G -- Low mode data in bin hex compression.
 D64 -- checksum
 
-HIGH MODE
+--------------------------------------------------
+FORMAT: HIGH MODE
 ##0417,HF90000m8IT=J><Ih@2h@D=<3=<bNB1ME0000ookS=0><Kh@;h@D=<H=<nPBn6G]0
 G0>6R4o4I7i8Y:9576M4h4B7Y8@:05>6>6=6;67606i5a5Q515W4K4M4Y4d435D5L5K5X5f5
 4600R4Q4Q4R4N4K4C4:4n3U3B3k2<3E3N3Y3f3k3i374C4J40005050505o4k4f4a4Y4J454
@@ -112,16 +113,17 @@ h8g8g8e8_8W8N8A8e7@7j6[6R6X6f6;7T7^7i7@8U800X:X:V:R:M:C:::2:d9I9c8M8>858
 98F8Z839=9H9c9;:00:5:595855515l4h4a4S4@444l3h3j304:4G4N4U4c4n400*kd;##
 --------------------------------------------------
 0417 -- Number of bytes in the message
-H -- High mode
+H -- High mode   or  T -- Transition from High to Low
 K9...400 -- High mode data in bin hex compression.
 kd; -- checksum
 
-
                DATA ACQUISITION (DAQ) RECORDS
             ------------------------------
+--------------------------------------------------
 LOW MODE – $WIPRR
    1       2            3  4    5   6  7     8      9      10     11   12   13 14    15  16
 $WIPRR,20150719T192703Z,0,40.4,0.0,10,76.30,432.41,-28.43,28.51,28.48,0.1,-0.1,12.0,13.8*56
+--------------------------------------------------
 1 -- Sentence ID, WIPRR
 2 -- Time stamp, ISO standard
 3 -- Mode: 0=low, 1=high
@@ -140,10 +142,12 @@ $WIPRR,20150719T192703Z,0,40.4,0.0,10,76.30,432.41,-28.43,28.51,28.48,0.1,-0.1,1
 16 -- NMEA checksum
 
 
+--------------------------------------------------
 HIGH, NO SHADOW – $WIPRR and $WIPRG
 When there is no shadow, only WIPRR and WIPRG (MFR global data are transmitted).
    1         2           3    4   5    6     7   8     9   10    11
 $WIPRG,20150719T164139Z,2.3,77.5,66.5,50.5,46.0,101.5,113.0,64.0*4F
+--------------------------------------------------
 1 -- Sentence ID, WIPRG
 2 -- Time stamp, ISO standard
 3 -- Shadow ratio
@@ -157,11 +161,13 @@ $WIPRG,20150719T164139Z,2.3,77.5,66.5,50.5,46.0,101.5,113.0,64.0*4F
 11 -- NMEA checksum
 
 
+--------------------------------------------------
 HIGH MODE WITH SHADOW
 HIGH, SHADOW – $WIPRR, $WIPRG, $WIPR1, $WIPR2, $WIPR3, $WIPR4, $WIPR5, $WIPR6, $WIPR7
 When in HIGH mode and the shadow value exceeds the setup threshold then the full suite of 9 NMEA
 packets is transmitted.
    1         2           3   4   5   6   7   8   9  10  11  12 13 14 15 16  17  18  19  20  21  22  23  24  25  26
+--------------------------------------------------
 $WIPR1,20150719T164846Z,294,293,294,293,292,290,289,288,216,77,67,66,89,237,277,276,276,280,284,284,286,290,293*14
 $WIPR2,20150719T164846Z,190,190,190,192,193,192,189,188,151,80,70,53,80,152,170,174,177,181,183,185,187,188,191*1D
 $WIPR3,20150719T164846Z,216,216,216,216,216,216,216,215,204,146,96,78,69,97,149,177,191,201,207,209,211,212,216*19

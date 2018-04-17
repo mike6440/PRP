@@ -6,7 +6,7 @@ chomp($usr);
 	#=================
 	# REMOVE ZOMBIES
 	#=================
-@removelist=("kermit","expect","perl");
+@removelist=("avgprp","kermit","expect","perl");
 foreach $xx (@removelist){
 	$cmd="ps -u $usr -o pid,command | grep \"$xx\"";
 	#print"test0 cmd = $cmd\n";
@@ -14,13 +14,13 @@ foreach $xx (@removelist){
 	#$ii=0; foreach(@pslist){chomp($_); print"test1 $ii, $pslist[$ii]\n"; $ii++} 
 	foreach $pscmd (@pslist){
 		chomp($pscmd);
-		if( $pscmd =~ /grep/){
+		if( $pscmd =~ /grep/ || $pscmd =~ /Cleanuprosr/){  # skip greps
 			#print"test 3 $pscmd\n";
 		} else {
 				# remove leading spaces
 			$pscmd =~ s/^\s+//;
 				# parse
-			@d=split/[ ]+/,$pscmd;
+			@d=split/[ ]+/,$pscmd; # split on spaces
 			#$ii=0; foreach(@d){chomp($_); print"$ii, $d[$ii]\n"; $ii++} die;
 			$cmd="kill $d[0]";
 			print"$pscmd -- $cmd\n";

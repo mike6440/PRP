@@ -10,22 +10,9 @@
 #    Check and reboot
 #14 * * * * $DAQSWFOLDER/UpdateDaq >> $DAQDATAFOLDER/daqlog
 			
-#v1 150629
-#v2 160211
-version="prp170806"
-#export DAQFOLDER="$HOME/swmain/apps/ISAR3"
-#export DAQSWFOLDER=$DAQFOLDER"/sw"
-#export DAQLIB=$DAQFOLDER"/tools"
-#export MYLIB=$DAQLIB
-#export DAQDATAFOLDER=$DAQFOLDER"/data"
-#export SETUPFILE=$DAQFOLDER"/sw/setup/su.txt"
-#echo $PATH | grep -q -s $DAQSWFOLDER
-#if [ $? -eq 1 ] ; then
-#    PATH=$PATH\:$DAQSWFOLDER\:.
-#    export PATH
-#fi
-
+version="UpdateDaq v2 180404"
 cd $DAQSWFOLDER
+
 echo $version" ====================" >> $DAQDATAFOLDER/daqlog;
 date -u "+%Y %m %d %H %M %S Z" >> $DAQDATAFOLDER/daqlog;
 
@@ -33,7 +20,7 @@ DaqUpdate >> $DAQDATAFOLDER/daqlog
 
 chk=`cat /tmp/tmpdaq`;
 if [ $chk -eq 1 ] > /dev/null ; then
-#	echo UpdateDaq no reboot
+	echo OK
 	echo "UpdateDaq, no reboot." >> $DAQDATAFOLDER/daqlog
 	exit 0;
 fi
@@ -52,7 +39,7 @@ if [ $chk -eq 0 ] > /dev/null ; then
 	screen -S PRP -p 1 -X stuff "G$(printf \\r)"
 
 	#echo UpdateDaq, reboot exit >> $DAQDATAFOLDER/daqlog
-	exit 1;
+	exit 0;
 fi
 exit 0;
 

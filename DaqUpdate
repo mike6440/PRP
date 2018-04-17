@@ -4,42 +4,32 @@
 use lib $ENV{MYLIB};
 use perltools::MRtime;
 use perltools::MRutilities;
+use Time::Zone;
 
 my @f = ('prpraw');
+my @d = (1800);
 my @v = ();
-my ($f,$is,@s,$s,$cmd,$nw,$age);
 
-$nw=now();
+#       prpraw      1521529544      3    600   OK
+print"  file       last sec        dif  lim   status\n";
+printf"  NOW =      %10d\n",now();
+my $os=tz_local_offset();
+
 	# SELECT STREAM
+my $is;
 for($is=0; $is<=$#f; $is++){
-	$f=$f[$is];
-	printf "$f  %d  ",$nw;
-		# LAST RECORD TIME
-	$cmd = sprintf("LastDataTime %s",$f);
-	$s = `$cmd`;
-	chomp($s); 
-		# 1502064482 2017 8 6 17 8 2
-	@s = split /[ ]+/, $s;
-	if($#s<=0){
-		print"bad -- record failure.\n";
-		push @v,0;
-	} else {
-		$dt=$s[0];
-		printf"%s  %d  ",dtstr($dt,'short'),$dt;
-			# THE AGE OF THE RECORD
-		if($dt==0){
-			print"    0 -- RECORD FAILURE.\n",$f;
-			push @v,0;		
-		} else {
-			$age = $nw - $dt;
-			print"    $age";
-			if ($age > 600){ print"    FAIL\n"; push @v,0}
-			else{ print"    OK\n"; push @v, 1;  }
-		}
-	}
+	my $f=$f[$is];
+		# FILE MOD TIME
+	my $mtime = (stat `LastDataFolder $f`)[9]-$os;
+	my $age = now() - $mtime;
+	printf"%10s   %10d   %4d   %4d   ",$f,$mtime,$age,$d[$is];
+	if ($age > $d[$is]){print"FAIL\n"; push @v,0}
+	else{ print"OK\n"; push @v, 1;  }
 }
 my $good=1;
+print"@v\n";
 foreach(@v){if($_ == 0){$good=0}}
-print"good = $good\n";
+#print"good = $good\n";
 `echo $good > /tmp/tmpdaq`;
+
 exit 0

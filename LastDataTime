@@ -5,6 +5,13 @@
 #$WIPRR,20150804T150652Z,0,40.2,0.0,10,84.05,399.14,1.13,18.20,18.31,6.8,9.4,89.8,13.8*6A
 # A valid record has ISO time in the second field. 
 
+# 20171006T190808Z ##0417,H190000NPZHADD:CE?:H?D=<f=<HQB=XE@O8LeN^HAUE:
+# LE?=H?D=<W=<HQB5XE58G0dEF?iB_L9S>SM@ZEm>E@OL;NNN@>`E_E^E]E[EZEYEXEUDI6K1I1N1H;
+# LEYEZEZE0000000000<?3?l>g>b>_>]>\>5>n5M3K3O3I9a>k>m>n>0000000000cB^BZBXBUBRBPB
+# OBIB>?E9o6T5[5k:[>V@HA0000000000YLVLULSLQLNLMLKL@KD9:282=2N>>LMLOLOL0000000000
+# 2S0S0SoRmRkRiRiR]RCLF@S;S8]8?CcJ\NCP0000000000:S:S;S=S;S:S:S9SjRbKP?Y:Z7F8KC6KoN
+# UP0000000000N@O@O@P@O@O@N@N@F@g<87f4M3g349Z<O>@?0000000000*4W4##
+
 use lib $ENV{MYLIB};
 use perltools::MRtime;
 use perltools::MRutilities;
@@ -14,16 +21,16 @@ my ($recno,$dt,$a,$s);
 $a = shift();
 $s = `LastDataRecord $a`;
 chomp $s;
+
 	# BAD CALL OR NO TIME AVAIL
 if($s eq '0'){
 	print"0";
 	exit 1;
 } 
 $s =~ s/^\s+//;  # remove leading blanks
-#print"$s\n";
 	# EXTRACT TIME
 my @w = split/[, ]+/,$s;
-#$i=0; foreach(@w){printf" $i  %s\n",$w[$i]; $i++}
+#$i=0; foreach(@w){printf" $i  %s\n",$w[$i]; $i++} die;
 $dt=dtstr2dt($w[0]);
 if($dt==0){
 	#print"bad record, no time\n";
