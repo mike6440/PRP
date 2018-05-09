@@ -1,7 +1,6 @@
 #!/usr/bin/perl -w
 
 #  1. Call after 'Stopprp'
-#		and
 #  2. ArchivePrp
 #
 #  Wipes clean the PRP/data folder
@@ -18,19 +17,23 @@ use perltools::MRtime;
 
 	## DATA PATH
 my $datapath="$ENV{HomePath}/swmain/apps/PRP/data";
-#print"data path = $datapath\n";
-print"
-=========================
-   WARNING
-=========================
-This process will delete everything from the PRP/data folder.
-Proceed to delete?  (y or n): ";
-
-my $ans=<>;
-chomp($ans);
-#print"You entered $ans\n";
+my $ans='n';
+if($#ARGV >= 0){
+    $ans=shift();
+    #print"$ans was in the commannd line.\n";
+} 
+else {
+    print"ClearPrpData: WARNING  This process will delete 
+everything from the PRP/data folder. 
+Call \"Archive\" to backup all collected data.
+";    
+    print"Proceed to delete?  (y or n): ";
+    $ans=<>;
+    chomp($ans);
+    print"You entered $ans\n";
+}
 if($ans =~ /y/i){
-	print"Delete data\n";
+	print"ClearPrpData\n";
 	my $cmd="rm -r $datapath/*";
 	#print"cmd=$cmd\n";
 	system $cmd;
@@ -39,4 +42,3 @@ if($ans =~ /y/i){
 }
 
 exit 0;
-

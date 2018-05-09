@@ -21,10 +21,7 @@
  
  9. End I connect                   -- "<control>-\ q"
                                        Hold control and press '\'. Release and press 'q'.
-                                       or leave it running and open another terminal.
-                                       
-
-
+                                       or leave it running and open another terminal.                                    
             BEGIN DATA COLLECTION
          ----------------------------
  Open a new terminal window, or quit 'I' with "^\ c"
@@ -45,11 +42,6 @@
  
  7.  prpraw                         -- end with ^c.
                                        This is the data written to the raw file.
-
-
-
-
-
              SCREEN COMMANDS
         -------------------------------- 
 All data collection programs run in the background in a "screen" called PRP.
@@ -65,9 +57,7 @@ All data collection programs run in the background in a "screen" called PRP.
  <control>-a d                      -- In screen, detatch terminal from screen.
   
  KillScreen                         -- erases the PRP screen. Halts all processes.
- 
-
- 
+  
              COMMON TERMINAL COMMANDS
           -------------------------------
 
@@ -91,8 +81,7 @@ gtscreen            --  Opens the DAQ screen (careful!), "^a d" to end.
 SSH FROM A REMOTE PC
    ssh rmr@10.0.0.xx      -- give the password.
                              Use "ifconfig" to determine 'xx'.
-
-
+                             
                PRP OUTPUT FORMATS
 --------------------------------------------------
 FORMAT: LOW MODE 

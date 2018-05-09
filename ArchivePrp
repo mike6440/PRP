@@ -1,13 +1,12 @@
 #!/usr/bin/perl -w
 
 #  Call after 'Stopprp'
-#  Tars entire PRP folder and stores in $HOME/prpdata/ folder
+#  Tars entire PRP folder and stores in /home/rmr/prpdata/ folder
 #  
 #  Call:  perl ArchivePrp
 #  
-#  Output: $HOME/prpdata/prparchive_20151020T123456Z.tar.gz
+#  Output: $HomePath/prpdata/prparchive_20151020T123456Z.tar.gz
 # 
-#v1—copied from ROSR and modified for PRP
 
 use lib $ENV{MYLIB};
 use perltools::MRutilities;
@@ -21,18 +20,18 @@ my $datapath="$ENV{HomePath}/swmain/apps/PRP";
 my $archivepath="$ENV{HomePath}/prpdata";
 #print"Archive path=$archivepath\n";
 if(! -d $archivepath){
-	print"Create $archivepath\n";
+	#print"Create $archivepath\n";
 	`mkdir $archivepath`;
 }
 
 	## TAR FILE NAME
 my $tarname=sprintf "prparchive_%s.tar.gz",dtstr(now(),'iso');
-#print"tarname=$tarname\n";
+print"ArchivePrp $tarname\n";
 
 
 	## TAR COMMAND
 my $cmd = sprintf "cd $datapath; tar -zcf $archivepath/$tarname .";
-print"$cmd\n";
+#print"$cmd\n";
 system $cmd;
 
 exit 0;

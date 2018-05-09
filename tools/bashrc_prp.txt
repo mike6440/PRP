@@ -1,4 +1,8 @@
 # edit 20170725T134714Z
+# new
+#     Start instead of Startprp
+
+
 export PS1='\w/$ '
 export EDITOR="vi"
 alias Top="top -u -s5"
@@ -41,6 +45,7 @@ prpraw () {
 	xx=`LastDataFolder prpraw`
 	tail -f $xx
 }
+alias Raw="prpraw";
 
 	# SCREEN
 alias isscreen='echo "CHECK FOR A SCREEN"; screen -ls'
@@ -50,9 +55,12 @@ alias gtscreen='echo "GO TO SCREEN"; screen -S PRP -d -r'
 alias G='cd $DAQSWFOLDER;  Z_prp `cat tmp`'
 
 		#START DATA COLLECTION
-Startprp () {
-	KillScreen;
-	cd $DAQSWFOLDER; ./PrepareForRun; export RUNSETUPFILE=`cat tmp`;
+Start () {
+    touch ~/tmp/daqstart;
+	KillScreen > /dev/null 2>&1;
+	cd $DAQSWFOLDER;
+	PrepareForRun;
+	export RUNSETUPFILE=`cat tmp`;
 	crontab $DAQSWFOLDER/tools/crontab_prp.txt
 	screen -S PRP -d -m -c $DAQSWFOLDER/tools/screenrc_prp.txt
 	screen -S PRP -p 1 -X stuff "G$(printf \\r)"
@@ -60,16 +68,25 @@ Startprp () {
 }
 
 	#STOP DATA COLLECTION SCREEN
-alias Stopprp="KillScreen; Stopcron; Cleanupprp;"
+#alias Stopprp="KillScreen; Stopcron; Cleanupprp;"
+alias Stop="rm ~/tmp/daqstart > /dev/null 2>&1; KillScreen > /dev/null 2>&1; Stopcron > /dev/null 2>&1; Cleanupprp > /dev/null 2>&1; echo 'DAQ Stopped'"
+alias Stopprp="Stop";
 
 	#START AND STOP CRONTAB
 alias Startcron="crontab $DAQSWFOLDER/tools/crontab_prp.txt"
 alias Stopcron="crontab -r"
 
+alias help="less $DAQSWFOLDER/help.txt"
 alias Help="less $DAQSWFOLDER/help.txt"
 
 #		PERL LIBRARY =============================
 export DAQLIB=$MYLIB
+
+    # alias
+alias daqlog="less $DAQDATAFOLDER/daqlog"
+alias Ping="ping -c3 "
+alias Archive="ArchivePrp";
+alias Wipe="ClearPrpData";
 
 cd $DAQSWFOLDER
 
