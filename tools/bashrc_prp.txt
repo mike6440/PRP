@@ -1,4 +1,4 @@
-# edit 20170725T134714Z
+# edit v10 20180509T153558Z 
 # new
 #     Start instead of Startprp
 
@@ -48,8 +48,8 @@ prpraw () {
 alias Raw="prpraw";
 
 	# SCREEN
-alias isscreen='echo "CHECK FOR A SCREEN"; screen -ls'
-alias gtscreen='echo "GO TO SCREEN"; screen -S PRP -d -r'
+alias isscreen='screen -ls'  #v10
+alias gtscreen='screen -S PRP -d -r'  #v10
 
 	# RUN CALLS
 alias G='cd $DAQSWFOLDER;  Z_prp `cat tmp`'
