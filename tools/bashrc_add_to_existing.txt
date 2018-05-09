@@ -29,13 +29,6 @@ if expr $DAQ = "ROSR" > /dev/null ; then
 test -f $DAQPATH/ROSR/sw/tools/bashrc_rosr.txt && . $_
 fi
 
-	# REBOOT FOLDER ~/tmp
-file="$HOME/tmp";
-if [ ! -d $file ]
-then
-  mkdir $file
-fi
-
     # KERMIT RC =====================
 echo "prompt k>>" > ~/.kermrc
 
