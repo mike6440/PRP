@@ -1,4 +1,4 @@
-# edit v10 20180509T153558Z 
+# edit v10 20180509T170605Z 
 # new
 #     Start instead of Startprp
 
@@ -45,7 +45,11 @@ prpraw () {
 	xx=`LastDataFolder prpraw`
 	tail -f $xx
 }
-alias Raw="prpraw";
+Raw () {
+	cd $DAQSWFOLDER;
+	xx=`LastDataFolder prpdecode`
+	tail -f $xx
+}
 
 	# SCREEN
 alias isscreen='screen -ls'  #v10
@@ -69,7 +73,7 @@ Start () {
 
 	#STOP DATA COLLECTION SCREEN
 #alias Stopprp="KillScreen; Stopcron; Cleanupprp;"
-alias Stop="rm ~/tmp/daqstart > /dev/null 2>&1; KillScreen > /dev/null 2>&1; Stopcron > /dev/null 2>&1; Cleanupprp > /dev/null 2>&1; echo 'DAQ Stopped'"
+alias Stop="rm ~/tmp/daqstart > /dev/null 2>&1; KillScreen > /dev/null 2>&1; Stopcron > /dev/null 2>&1; Cleanupprp > /dev/null 2>&1; echo 'DAQ Stopped'; echo 'DAQ Stopped' >> $HOME/tmp/bootlog"
 alias Stopprp="Stop";
 
 	#START AND STOP CRONTAB
@@ -91,4 +95,15 @@ alias Wipe="ClearPrpData";
 cd $DAQSWFOLDER
 
 alias suedit='vim $DAQSWFOLDER/setup/su.txt'
+
+# v10 add reboot capability
+alias bootlog="tail ~/tmp/bootlog"
+# restart set AutoStartFlag in /etc/rc.local (ubuntu > 16.04)
+if [ -e ${HOME}/tmp/AutoStartFlag ] 
+    then
+    rm ${HOME}/tmp/AutoStartFlag
+    dd=$(date -u "+%Y%m%d,%H%M%SZ")
+    echo "Bootbash  $dd" >> ${HOME}/tmp/bootlog
+    ifdaqstart
+fi
 

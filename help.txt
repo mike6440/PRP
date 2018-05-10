@@ -32,15 +32,15 @@
                                        example: "SetDate password 2015 08 04 02 05 34"
                                        password is the current password of the PRP PC.
                                        
- 3.  gedit setup/su.txt             -- Edit the setup file.
+ 3.  gedit setup/su.txt             -- Edit the setup file.  IF NECESSARY!!
  
- 4.  ArchivePrp                     -- Optional, see "SAVE DATA" below.
+ 4.  Archive                        -- Optional, see "SAVE DATA" below.
  
- 5.  ClearPrpData (optional).       -- Optional, see "DELETE DATA" below.
+ 5.  Wipe [y]                       -- Optional, see "DELETE DATA" below.
  
- 6.  Startprp                       -- Begins data collection.
+ 6.  Start                          -- Begins data collection.
  
- 7.  prpraw                         -- end with ^c.
+ 7.  Raw                            -- end with ^c.
                                        This is the data written to the raw file.
              SCREEN COMMANDS
         -------------------------------- 
@@ -67,11 +67,11 @@ gtdaq               --  go to the PRP/sw folder
 
 I                   --  direct connect to PRP, "^\ q" to end
 
-Startprp            --  begin data collection
+Start               --  begin data collection
 
-Stopprp             --  end data collection
+Stop                --  end data collection
 
-prpraw              --  show raw data file, ^c to end
+Raw                 --  show raw data file, ^c to end
 
 isscreen            --  Checks to see if the DAQ screen is on.
 
@@ -130,7 +130,6 @@ $WIPRR,20150719T192703Z,0,40.4,0.0,10,76.30,432.41,-28.43,28.51,28.48,0.1,-0.1,1
 15 -- Input power voltage, after input diode, volts
 16 -- NMEA checksum
 
-
 --------------------------------------------------
 HIGH, NO SHADOW – $WIPRR and $WIPRG
 When there is no shadow, only WIPRR and WIPRG (MFR global data are transmitted).
@@ -148,7 +147,6 @@ $WIPRG,20150719T164139Z,2.3,77.5,66.5,50.5,46.0,101.5,113.0,64.0*4F
 9 -- G6, global irradiance for channel 6, mean of horizons 1 & 2, ADC counts
 10 -- G7, global irradiance for channel 7, mean of horizons 1 & 2, ADC counts
 11 -- NMEA checksum
-
 
 --------------------------------------------------
 HIGH MODE WITH SHADOW

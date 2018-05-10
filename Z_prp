@@ -5,14 +5,15 @@
 #       Z_prp.ex `cat tmp`
 
 set PROGRAMNAME Z_prp.ex
-set VERSION v12
-set EDITDATE 170805
+set VERSION v13
+set EDITDATE 180509
 
 # 
 #v9 -- trying to fix the 232 pipe problem
 #v10 -- com2 development
 #v11 -- day0 error 
 #v12 -- add simulate
+#v13 -- add decode file
 
 log_user 0  ;# 0-quiet, 1=verbose
 
@@ -232,7 +233,8 @@ while 1 {
 		set day0 $day1
 			# OPEN NEW RAW FILE
 		set fname [timestamp -gmt -format "%y%m%d"]
-		set rawname "$datapath/prpraw_$fname.txt";
+		set rawname "$datapath/prpraw_$fname.txt"
+		set decodename "$datapath/prpdecode_$fname.txt"
 		send_user "New day, file $rawname\n";
 	}
 	#===================================
@@ -244,13 +246,14 @@ while 1 {
 		-i $PRP  
 		"##*##" {
 			set rawstr $expect_out(0,string);
-			set datstr [exec DecodePacket $rawstr]
-# 			set P [open /tmp/pkt w 0600];
-# 			puts $P $datstr;
-# 			close $P;
-			set strx [timestamp -gmt -format "%Y%m%dT%H%M%SZ "]$rawstr
-			
+			set datstr [exec DecodePacket $rawstr];
+				# SAVE DECODE  v13
+			set strd [timestamp -gmt -format "%Y%m%dT%H%M%SZ "]$datstr
+			set P [open $decodename a 0600];
+			puts $P $strd;
+			close $P;
 				# SAVE TO RAW FILE
+			set strx [timestamp -gmt -format "%Y%m%dT%H%M%SZ "]$rawstr
 			set F [open $rawname a 0600]
 			puts $F $strx
 			close $F;
