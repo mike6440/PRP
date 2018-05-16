@@ -37,7 +37,7 @@ alias I2='cd $DAQSWFOLDER; 	kerm232 `FindUSBPort 2` 9600'
 		# CHECK DATA
 prpavg () {
 	cd $DAQSWFOLDER;
-	xx=`LastDataFolder prpavg`
+	xx=`LastDataFolder avgraw`
 	tail -10 $xx
 }
 prpraw () {

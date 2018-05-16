@@ -7,6 +7,8 @@ use lib "$ENV{DAQLIB}";
 use perltools::MRtime;
 use perltools::MRutilities;
 
+$HomePath=$ENV{HomePath}; # allows either ~/ or ~/Dropbox
+
 	#=========================
 	# MAKE SURE THE CORRECT FOLDERS ARE IN PLACE
 	# IF NOT, THEN CREATE THEM
@@ -20,41 +22,47 @@ if ( ! -d $fndata0 ) {
 	#========================
 	# CREATE THE NEW DATA FOLDER FOR THIS RUN
 	#========================
-#print"MAIN DATA FOLDER: $fndata0\n";
+# print"debug:MAIN DATA FOLDER: $fndata0\n";
 my $dt0 = now();
 $fndata = sprintf "$fndata0/data_%s", dtstr($dt0,'iso');
 `mkdir $fndata`;
-#print"DATA FOLDER = $fndata\n";
+# print"debug:DATA FOLDER = $fndata\n";
 	# =======================
 	# RUN TIME SU FILE
 	# =======================
 my $sutxt = $ENV{SETUPFILE};
-#print"sutxt = $sutxt\n";
+# print"debug:sutxt = $sutxt\n";
 my $prpsn = FindInfo($sutxt, "PRP SERIAL NUMBER");
-#print"sn = $prpsn\n";
+# print"debug:sn = $prpsn\n";
 	#su_isodate.txt
 $fsu = sprintf "%s/su_%s.txt", $fndata, dtstr($dt0,'iso');
 #print"Run time su = $fsu\n";
 	# info
-my $dinfo = `find $ENV{DAQSWFOLDER}/setup -name *$prpsn* -type dir -print`;
-chomp $dinfo;
-#print"dinfo = $dinfo\n";
-my $finfo=`find $dinfo -iname INFO*.txt -print`; chomp($finfo);
-#print"finfo=$finfo\n";
-my $fprprx=`find $dinfo -iname prprx*.txt -print`; chomp($fprprx);
-#print"fprprx=$fprprx\n";
-my $fsol=`find $dinfo -iname *sol*.txt -print`; chomp($fsol);
-#print"fsol=$fsol\n";
-my $fspn=`find $dinfo -iname *spn*.txt -print`; chomp($fspn);
-#print"fspn=$fspn\n";
+$CalFolder="$ENV{DAQSWFOLDER}/setup/prp7";
+# PRP INFO: $HomePath/swmain/apps/PRP/sw/setup/prp07/INFO_07_1604.txt
+# HEAD ZE CAL: $HomePath/swmain/apps/PRP/sw/setup/prp07/469.sol.txt
+# PRP CAL FILE: $HomePath/swmain/apps/PRP/sw/setup/prp07/prprx_07_1604.txt
+# HEAD BANDPASS: $HomePath/swmain/apps/PRP/sw/setup/prp07/469.spn.txt
+$finfo = $CalFolder."/".FindInfo($sutxt,'PRP INFO');
+if( ! -f $finfo){ print"$finfo does NOT exist.\n"; exit 1}
+# print"debug:$finfo EXISTS\n";
+my $fprprx=$CalFolder."/".FindInfo($sutxt,'PRP CAL FILE');
+if(! -f $fprprx){ print"$fprprx does NOT exist.\n"; exit 1}
+# print"debug:$fprprx EXISTS\n";
+my $fsol=$CalFolder."/".FindInfo($sutxt,'HEAD ZE CAL');
+if(! -f $fsol){ print"$fsol does NOT exist.\n"; exit 1}
+# print"debug:$fsol EXISTS\n";
+my $fspn=$CalFolder."/".FindInfo($sutxt,'HEAD BANDPASS');
+if(! -f $fspn){ print"$fspn does NOT exist.\n"; exit 1}
+# print"debug:$fspn EXISTS\n";
 
 	# su.txt to start
 `cp $ENV{SETUPFILE} $fsu`;
 	# INFO
 `cat $finfo >> $fsu`;
 `cat $fprprx >> $fsu`;
-#`cat $fspn >> $fsu`;
-#`cat $fsol >> $fsu`;
+`cat $fspn >> $fsu`;
+`cat $fsol >> $fsu`;
 	#========================
 	# MODIFY THE SETUP FILE 
 	#  THIS FILE = $fsu
@@ -62,17 +70,17 @@ my $fspn=`find $dinfo -iname *spn*.txt -print`; chomp($fspn);
 	#========================
 	# HEADER LINE
 $cmd=sprintf "perl -pi -e 's!: (.+)!: %s!g if /^THIS FILE/' %s", $fsu, $fsu;
-#print"\ncmd = $cmd\n";
+# print"debug:cmd = $cmd\n";
 system $cmd;
 		# OUT PATH
 $cmd=sprintf "perl -pi -e 's!: (.+)!: %s!g if /^RT OUT PATH/' %s", $fndata, $fsu;
-#print"\ncmd = $cmd\n";
+# print"debug:cmd = $cmd\n";
 system $cmd;
 	#========================
 	# setupfile -> tmp
 	#========================
 open(F,'>tmp'); print F "$fsu\n"; close F;
-print"SETUPFILE  $fsu\n";
+print"$fsu\n";
 
 exit
 

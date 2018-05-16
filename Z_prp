@@ -246,7 +246,9 @@ while 1 {
 		-i $PRP  
 		"##*##" {
 			set rawstr $expect_out(0,string);
+			#send_user "<<$rawstr>>\n"
 			set datstr [exec DecodePacket $rawstr];
+			send_user "$datstr\n"
 				# SAVE DECODE  v13
 			set strd [timestamp -gmt -format "%Y%m%dT%H%M%SZ "]$datstr
 			set P [open $decodename a 0600];
@@ -261,37 +263,8 @@ while 1 {
 			set spawn_id $PRPAV
 			send "$datstr\r\n"
 		}
+		-i $PRPAV
+		"WIPRR*\n" { send_user "$expect_out(0,string)\n"}
 		timeout {send_user "timeout1\n"}
-	}
-	set timeout 1
-	set spawn_id $PRPAV
-	expect {
-		-re (\\\$WIPRR.*?\\*..).*(\\\$WIPRG.*?\\*..).*(\\\$WIPR1.*?\\*..).*(\\\$WIPR2.*?\\*..).*(\\\$WIPR3.*?\\*..).*(\\\$WIPR4.*?\\*..).*(\\\$WIPR5.*?\\*..).*(\\\$WIPR6.*?\\*..).*(\\\$WIPR7.*?\\*..).* { 
-			set str $expect_out(1,string)
-			send_user "$str HiShad\n";
-			SendCom2 $str
-			SendCom2 $expect_out(2,string)
-			send_user "$expect_out(2,string)\n";
-			SendCom2 $expect_out(3,string)
-			SendCom2 $expect_out(4,string)
-			SendCom2 $expect_out(5,string)
-			SendCom2 $expect_out(6,string)
-			SendCom2 $expect_out(7,string)
-			SendCom2 $expect_out(8,string)
-			SendCom2 $expect_out(9,string)
-		}
-		-re (\\\$WIPRR.*?\\*..).*(\\\$WIPRG.*?\\*..) { 
-			set str $expect_out(1,string)
-			send_user "$str HiNoShad\n";
-			SendCom2 $str
-			SendCom2 $expect_out(2,string)
-			send_user "$expect_out(2,string)\n";
-		}
-		-re (\\\$WIPRR.*?\\*..) {
-			set str $expect_out(1,string)
-			send_user "$str Low\n";
-			SendCom2 $str
-		}
-		timeout {send_user "timeout2\n"}
 	}
 }

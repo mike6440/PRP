@@ -12,7 +12,7 @@ chomp($strin);
 	# DOES IT HAVE START AND END CHARS?
 my $i1=index($strin,'##');
 my $i2=index($strin,'##',$i1+2);
-if($i1<00 || ($i2-$i1)<60){exit 1}
+if($i1<00 || ($i2-$i1)<60){print"0";exit 1}
 	# FIRST PACKET
 $strin = substr($strin,$i1,$i2);
 #print"strin=$strin\n"; die;

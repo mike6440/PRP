@@ -1,12 +1,10 @@
 	THIS FILE NAME: su_prp7_1805.txt
 	Editdate: 20180509T014433Z
    	# 1 -- simulate   0 -- standard com, e.g. /dev/ttyUSB1
-PRP SERIAL NUMBER: 7
 SIMULATEFLAG: 0
 RS232 FLAG: 1
     This file will be set with the START command.
 RT OUT PATH: ../data
-THIS FILE: tbd
 ========= EXPERIMENT =========================
 EXPERIMENT NAME: PRP7
 GEOGRAPHIC LOCATION: RMR CO
@@ -24,7 +22,7 @@ TCM FIXED HEADING: 0
 TCM PITCH CORRECTION: 0
 TCM ROLL CORRECTION: 0
 TCM HEADING CORRECTION: 0
-PRP SHADOW THRESHOLD: 20
+PRP SHADOW THRESHOLD: 100
 PRP AVERAGING TIME SECS: 120
   # If shutdownflag == 1 and avg from $shutdownchannel < $shutdownthreshold == go to LOW
 PRP SHUTDOWN CONTROL: 1

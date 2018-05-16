@@ -1,10 +1,14 @@
 #!/usr/bin/perl -X
+# Call: avgprp (no arguments)
+# The program uses `cat tmp` as the setup file.
 
 my $PROGRAMNAME = 'avgprp';
-my $VERSION = '02';  
-my $EDITDATE = '150626';
+my $VERSION = '03';  
+my $EDITDATE = '180511';
 
 #v01 -- taken from avgrsr v7
+#v02 -- 
+#v03 -- clean up for new version of PrepareForRun
 
 @NL =(8,30);
 @NH=(8,46);
@@ -25,15 +29,16 @@ use perltools::MRradiation;
 #use Scalar::Util qw(looks_like_number);
 #v0 => looks_like_number($w[0]) && $w[0]>=0 && $w[0]<=5 ? $w[0]*$slope0 + $offset0 : -999,
 
+# 
 my $setupfile = `cat tmp`;
+chomp($setupfile);
+if(! -f $setupfile){print"$setupfile does NOT exist\n"; exit 1}
 #print "SETUP FILE = $setupfile\n";
 
-
-#print"\n======================== START PROCESSING $PROGRAMNAME =======================\n";
 # DEFINE OUT PATH
 my $datapath =  FindInfo($setupfile,'RT OUT PATH', ': ');
-if ( ! -d $datapath ) { print"!! RT OUT PATH - ERROR, $datapath\n"; die }
-#print"test datapath = $datapath\n";
+if ( ! -d $datapath ) { print"!! RT OUT PATH - ERROR, $datapath\n"; exit 1 }
+#print"debug:datapath = $datapath\n";
 
 	# PSP CAL
 @x=FindLines($setupfile,"% PSP CALIBRATION",1);
@@ -74,7 +79,6 @@ else {
 	$rollcorrection = FindInfo($setupfile,"TCM ROLL CORRECTION");
 	$headingcorrection = FindInfo($setupfile,"TCM HEADING CORRECTION");
 }
-
 $jdfold=0;
 #----------------- HEADER ----------------
 $header = "PROGRAM: $PROGRAMNAME (Version $VERSION, Editdate $EDITDATE)
@@ -88,6 +92,18 @@ $header = $header."PRP SERIAL NUMBER: $isarsn\n";
 
 $headsn = FindInfo($setupfile,'HEAD SERIAL NUMBER', ': ');
 $header = $header."HEAD SERIAL NUMBER: $headsn\n";
+
+if($fixedtiltflag == 0){
+	$header=$header."TILT CORRECTION:
+  PITCH = TCMpitch + $pitchcorrection
+  ROLL = TCMROLL + $rollcorrection
+  HEADING = TCMheading + $headingcorrection\n";
+} else {
+	$header=$header."FIXED TILT:
+  PITCH = $fixedpitch
+  ROLL = $fixedroll
+  HEADING = $fixedheading\n";
+}
 
 $ShadowRatioThreshold = FindInfo($setupfile,'PRP SHADOW THRESHOLD', ':');
 $header = $header."PRP SHADOW THRESHOLD: $ShadowRatioThreshold\n";
@@ -111,8 +127,8 @@ $header = $header."PRP SHUTDOWN CHANNEL: $shutdownchannel\n";
 $shutdownthreshold = FindInfo($setupfile, 'PRP SHUTDOWN THRESHOLD',':');
 $header = $header."PRP SHUTDOWN THRESHOLD: $shutdownthreshold\n";
 
-$missing = FindInfo($setupfile,'MISSING VALUE', ': ');
-$header = $header."MISSING NUMBER: $missing\n";
+$missing = FindInfo($setupfile,'MISSING VALUE');
+$header = $header."MISSING VALUE: $missing\n";
 
 @strings = FindLines($setupfile, 'PRP COMMENTS:', 100 );
 $header = $header."PRP COMMENTS:\n";
@@ -197,9 +213,12 @@ $dt=now();
 @jd=dt2jdf($dt);
 $jdold=int($jd[1]);
 @dt=datevec($dt);
-$avgoutfile=sprintf"$datapath/prp_avg_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
-#$rawoutfile=sprintf"$datapath/prp_raw_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
-
+$avgoutfile=sprintf"$datapath/avgout_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
+$rawoutfile=sprintf"$datapath/avgraw_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
+$tmpfile="/tmp/avgprpdebug";
+open D,">>$tmpfile" or die;
+print D "Open debug\n";
+close D;
 
 $Nsweeps=0;
 while ( ReadNextRecord($datapath) == NO ) {};
@@ -225,9 +244,9 @@ while ( 1 ) {
 		$jdold=int($jd[1]);
 		@dt=datevec($dt);
 		#print"new day\n";
-		$avgoutfile=sprintf"$datapath/prp_avg_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
+		$avgoutfile=sprintf"$datapath/avgout_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
 		#print"New avg file $avgoutfile\n";
-		#$rawoutfile=sprintf"$datapath/prp_raw_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
+		$rawoutfile=sprintf"$datapath/avgraw_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
 		#print"New raw file $rawoutfile\n";
 	}
 
@@ -292,8 +311,9 @@ sub ReadNextRecord
 	
 			# SPLIT 
 		@r=split /[ ]+/, $str;
-	# 	$i=0; foreach(@r){print"$i, $_\n"; $i++}
-	# 	die;
+# 		print"str=$str\n";
+# 		$i=0; foreach(@r){print"$i, $_\n"; $i++}
+# 		die;
 
 		$Nfields = $#r;	
 		$record{mode}=$r[0];
@@ -337,7 +357,7 @@ sub ReadNextRecord
 			if($n==0){$x=$missing} else{$x=$x/$n}
 			push @av,$x;
 		}
-		#$i=0; foreach(@av){printf"test %3d %.3f\n",$i,$_; $i++}
+		#$i=0; foreach(@av){printf"debug:%3d %.3f\n",$i,$_; $i++}
 	
 		if($fixedtiltflag == 0){
 			%record=(%record,
@@ -388,25 +408,29 @@ sub ReadNextRecord
 		@x = ComputeLongwave($record{pir},$record{tcase},$record{tdome},$Kcoefficient,$sigma,$epsilon,$missing);
 		$record{lw}=$x[0];
 	
-	# 	printf"mode = %d\n", $record{mode};
-	# 	printf"Thead = %.2f\n", $record{thead};
-	# 	printf"pitch=%.2f\n",$record{p};
-	# 	printf"roll=%.2f\n",$record{r};
-	# 	printf"heading=%.2f\n",$record{az};
-	# 	printf"psp=%.2f  %.2f\n",$record{psp}, $record{sw};
-	# 	printf"pir=%.2f   %.2f\n",$record{pirv}, $record{pir};
-	# 	printf"case=%.2f   %.2f\n",$record{case}, $record{tcase};
-	# 	printf"dome=%.2f   %.2f\n",$record{dome}, $record{tdome};
-	# 	printf"lw = %.2f\n", $record{lw};
-	# 	printf"batt=%.2f\n",$record{batt};
+# 		printf"mode = %d\n", $record{mode};
+# 		printf"Thead = %.2f\n", $record{thead};
+# 		printf"pitch=%.2f\n",$record{p};
+# 		printf"roll=%.2f\n",$record{r};
+# 		printf"heading=%.2f\n",$record{az};
+# 		printf"psp=%.2f  %.2f\n",$record{psp}, $record{sw};
+# 		printf"pir=%.2f   %.2f\n",$record{pirv}, $record{pir};
+# 		printf"case=%.2f   %.2f\n",$record{case}, $record{tcase};
+# 		printf"dome=%.2f   %.2f\n",$record{dome}, $record{tdome};
+# 		printf"lw = %.2f\n", $record{lw};
+# 		printf"batt=%.2f\n",$record{batt};
+# 		die;
 			# WIPRR -- PRP BASIC DATA
 		$str=sprintf"\$WIPRR,%s,%d,%.1f,%.1f,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.1f,%.1f,%.1f,%.1f*",
 		$timestamp,$record{mode},$record{thead},$record{shadow},$ShadowRatioThreshold,$record{sw},$record{lw},
 		$record{pir},$record{tcase},$record{tdome},$record{p},$record{r},$record{az},$record{batt};
 		$str=$str.NmeaChecksum($str);
-		#open F,">>$rawoutfile";
-		#print F "$str\n";
-		print "$str\n";
+		open F,">>$rawoutfile" or die;
+		print F "$str\n";
+		print "$str\n";  #-->> PRINT WIPRR
+open D,">>$tmpfile" or die;
+print D "$str\n";
+close D;
 				# CHANGE INPUT TYPE -- HIGH TO LOW		
 		if ( $record{mode}==0 && $N_H > 0) {
 			print"Begin low input, reset Accumulators\n";
@@ -424,7 +448,6 @@ sub ReadNextRecord
 			$cmd = sprintf("\$record\{a%03d\} = \$missing;",$i-$NHsweeps[0]);
 			eval($cmd);
 		}
-		
 		#===================
 		# FILL RECORD ARRAY
 		#===================
@@ -452,8 +475,11 @@ sub ReadNextRecord
 			}
 			$str=$str."*";
 			$str=$str.NmeaChecksum($str);
-			#print F "$str\n";		
-			print "$str\n";
+			print F " $str\n";		
+			print " $str\n";  #-->> PRINT WIPRG
+open D,">>$tmpfile" or die;
+print D " $str\n";
+close D;
 			$N_H++;
 				
 				# HIGH -- SHADOW
@@ -473,12 +499,15 @@ sub ReadNextRecord
 					}
 					$str=$str."*";
 					$str=$str.NmeaChecksum($str);
-					#print F "$str\n";
-					print "$str\n";
+					print F " $str\n";
+					print " $str\n";  #-->> PRINT WIPR1...WIPR7
+open D,">>$tmpfile" or die;
+print D " $str\n";
+close D;
 				}
 			}
 		}
-		#close F;
+		close F;
 		return (YES);
 	}
 }
