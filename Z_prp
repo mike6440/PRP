@@ -5,8 +5,8 @@
 #       Z_prp.ex `cat tmp`
 
 set PROGRAMNAME Z_prp.ex
-set VERSION v13
-set EDITDATE 180509
+set VERSION v14
+set EDITDATE 180517
 
 # 
 #v9 -- trying to fix the 232 pipe problem
@@ -14,6 +14,7 @@ set EDITDATE 180509
 #v11 -- day0 error 
 #v12 -- add simulate
 #v13 -- add decode file
+#v14 180517 -- add sudo kermit in case there's a UUCP lockfile issue
 
 log_user 0  ;# 0-quiet, 1=verbose
 
@@ -38,8 +39,14 @@ proc SpawnPrp { } {
 		# Find the USB port
 	set usbport [exec perl FindUSBPort 1]
 		# START PROCESS -- KERMIT FOR RS232
-	set PRPPID [spawn kermit]
+	set PRPPID [spawn sudo kermit]
 	set PRP $spawn_id
+	expect {
+		"assword" {
+			send "r0srr0sr\n"
+		}
+		">>" { send "\n" }
+	}
 	set timeout 2
 	expect {
 		timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
