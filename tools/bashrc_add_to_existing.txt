@@ -10,6 +10,16 @@
 	|| export HomePath="$HOME"
 
 export PS1='\w/$ '
+if [ -n "$SSH_CLIENT" ]; then text=" ssh:"
+export PS1='\[\e[1;32m\]${text} \W$ \[\e[m\]'
+fi
+
+    # REBOOT FOLDER ~/tmp
+file="$HOME/tmp";
+if [ ! -d $file ]
+then
+  mkdir $file
+fi
 
 export DAQ="PRP"
 [ -d $HOME/Dropbox ] \

@@ -2,6 +2,7 @@
 #edit 20170625T225623Z
 #kermit_serial_connect.ex
 #Note: the file .kermrc has the command "prompt k>>"
+#v2 180517 -- add sudo to kermit call
 
 set log_user 0
 
@@ -29,9 +30,16 @@ if {$argc == 0} {
 
 
 # START PROCESS -- KERMIT FOR ISAR MODEM
-spawn kermit
+spawn sudo kermit
+expect {
+	"assword" {
+		send "r0srr0sr\n"
+	}
+	">>" { send "\n" }
+}
 set ISAR $spawn_id
 set timeout 4
+send_user "Pwd okay\n";
 
 expect {
 	-i ISAR
