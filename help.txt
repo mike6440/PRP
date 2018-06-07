@@ -207,3 +207,35 @@ b1   b2   b3   b4   b5   b6   b7   b8   b9   b10 b11 b12.. b14 b15  b16  b17  b1
 1042 1043 1043 1043 1042 1041 1041 1041 1040 939 558 369 259 209 517 778 908 991 1028 1037 1039 0 0
 ##
 
+
+---da0_flat.txt------------
+0    1    2     3    4  5  6  7  8  9    10   11     12     13      14    15...
+nrec shad shlim yyyy MM dd hh mm ss mode th   sw     lw     pir     tcase tdome
+1941 45.0 10    2018 05 19 19 38 50 1    39.9 832.34 332.33 -105.36 24.88 24.90
+
+...16    17   18   19
+...pitch roll az   batt
+   0.0   2.0  37.9 14.6
+   
+---da0.txt--------------------------
+  0  1     2    3  4  5  6  7  8     9         10           11    12    13     14...
+nrec shrat yyyy MM dd hh mm ss thead lat       lon          saz   sze   sw     lw 
+1941 45.0 2018 05 19 19 38 50  39.9  47.649620 -122.313120  166.6 28.3  832.34 332.33
+
+... 15      16     17     18    19   20    21   22   23   24     25
+    piru    tcase  tdome  pitch roll az    sog  cog  hdg  sol_n  sol_d
+  -105.36   24.88  24.90  0.0   2.0  37.9  0.0  0.0  0.0  992.3  47.6  
+
+---da1_flat.txt ... da7_flat.txt----------------------------
+da1_flat.txt ... da7_flat.txt
+  0  1     2     3    4  5  6  7  8  9      10   11   12   13   14   15   16   17...
+nrec shad  shlim yyyy MM dd hh mm ss g      s1   s2   s3   s4   s5   s6   s7   s8 
+1941 45.0  10    2018 05 19 19 38 50 1997.0 1990 1975 1962 1945 1935 1915 1898 1879 
+
+...18   19  20  21  22  23   24   25   26   27   28   29   30   31   32
+   s9   s10 s11 s12 s13 s14  s15  s16  s17  s18  s19  s20  s21  s22  s23
+   1713 732 522 516 554 1409 1889 1909 1925 1939 1960 1972 1991 1992 0
+
+---da1.txt ... da7.txt--------------------------
+
+nrec yyyy MM dd hh mm ss lat lon sze saz shrat shadow edg1 edg2 edge horiz global diffuse normal  
