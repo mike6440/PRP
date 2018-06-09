@@ -5,7 +5,6 @@ if [ -e ~/tmp/daqstart ]
 then
         # daq was running at reboot.
     echo `date -u "+%y%m%d,%H%M%Sz"`--Backup data and re-start DAQ >> $HOME/tmp/bootlog
-    #echo `date -u "+%y%m%d,%H%M%Sz"`--Backup data and re-start DAQ
     
         # STOP
     crontab -r 2>/dev/null
@@ -27,3 +26,19 @@ else
 fi
 
 
+Start () {
+	ps cax | grep Z_prp > /dev/null   # Z_prp is the app in question		
+	if [ $? -eq 0 ]; then
+		echo "DAQ is already running."
+	else 
+		touch ~/tmp/daqstart;
+		KillScreen > /dev/null 2>&1;
+		cd $DAQSWFOLDER;
+		PrepareForRun > /dev/null;
+		export RUNSETUPFILE=`cat tmp`;
+		crontab $DAQSWFOLDER/tools/crontab_prp.txt
+		screen -S PRP -d -m -c $DAQSWFOLDER/tools/screenrc_prp.txt
+		screen -S PRP -p 1 -X stuff "G$(printf \\r)"
+		isscreen
+	fi
+}

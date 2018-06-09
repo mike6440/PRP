@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+# http://poe.perl.org/?Poe_cookbook/UDP_Sockets
+
+use warnings;
+use strict;
+use POE;
+use IO::Socket::INET;
+use constant DATAGRAM_MAXLEN => 1024;
+POE::Session->create(
+  inline_states => {
+    _start       => \&client_start,
+    get_datagram => \&client_read,
+  }
+);
+POE::Kernel->run();
+exit;
+
+sub client_start {
+  my $kernel = $_[KERNEL];
+  my $socket = IO::Socket::INET->new(Proto => 'udp',);
+  die "Couldn't create client socket: $!" unless $socket;
+  $kernel->select_read($socket, "get_datagram");
+  my $message = "This is a test.";
+  print "Sending '$message'\n";
+  my $server_address = pack_sockaddr_in(8675, inet_aton("127.0.0.1"));
+  send($socket, $message, 0, $server_address) == length($message)
+    or die "Trouble sending message: $!";
+}
+
+sub client_read {
+  my ($kernel, $socket) = @_[KERNEL, ARG0];
+  my $remote_address = recv($socket, my $message = "", DATAGRAM_MAXLEN, 0);
+  return unless defined $remote_address;
+  my ($peer_port, $peer_addr) = unpack_sockaddr_in($remote_address);
+  my $human_addr = inet_ntoa($peer_addr);
+  print "(client) $human_addr : $peer_port sent us $message\n";
+  send($socket, $message, 0, $remote_address) == length($message)
+    or warn "Trouble sending response: $!";
+}

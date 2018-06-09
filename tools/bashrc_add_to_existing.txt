@@ -10,8 +10,9 @@
 	|| export HomePath="$HOME"
 
 export PS1='\w/$ '
-if [ -n "$SSH_CLIENT" ]; then text=" ssh:"
-export PS1='\[\e[1;32m\]${text} \W$ \[\e[m\]'
+if [ -n "$SSH_CLIENT" ]; then 
+	text="ssh:"
+	export PS1='\[\e[1;32m\]${text} \W$ \[\e[m\]'
 fi
 
     # REBOOT FOLDER ~/tmp

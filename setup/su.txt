@@ -7,6 +7,9 @@ RS232 FLAG: 1
     This file will be set with the START command.
 RT OUT PATH: ../data
 THIS FILE: tbd
+TELNET PROGRAM: socktxx
+TELNET SERVER IP: 10.1.10.86
+TELNET SERVER PORT: 5555
 ========= EXPERIMENT =========================
 EXPERIMENT NAME: PRP7
 GEOGRAPHIC LOCATION: RMR CO

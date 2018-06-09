@@ -1,0 +1,91 @@
+#! /usr/bin/perl -w
+# Connects as a client to a socket server with ip# port.
+# Builds the $PRP01 packet and sends through the socket.
+# sends $PRP01,%s,M,,,,,M,*5A if there is no data. 
+
+# Input: 
+#  $#ARGV=-1    socktxx (no args) :: uses su.txt for ip and port; computes ROSST string
+#   $#ARGV=0    socktxx "string" :: uses su.txt for ip and port; sends "string"
+#   $#ARGV=1    socktxx ip port  :: computes ROSST string and send it to ip/port.
+#   $#ARGV=2    socktxx ip port "string" :: sends "string" to ip/port.
+
+use lib $ENV{DAQLIB};
+use perltools::MRtime;
+use perltools::MRutilities;
+# use perltools::MRsensors;
+# use perltools::MRstatistics;
+# use perltools::Isar;
+# use POSIX;
+use IO::Socket::INET;
+
+# ip# and port from su.txt or command line.
+if($#ARGV == -1 || $#ARGV == 0)
+{
+	$serverip=FindInfo(`cat tmp`,'TELNET SERVER IP',':');
+	$serverport=FindInfo(`cat tmp`,'TELNET SERVER PORT',':');
+} 
+elsif($#ARGV == 1 || $#ARGV == 2) 
+{
+	$serverip=shift();
+	$serverport=shift();
+}
+else {}
+
+# auto-flush on socket
+$| = 1;
+
+# create a connecting socket
+my $socket = new IO::Socket::INET (
+    PeerHost => $serverip,
+    PeerPort => $serverport,
+    Proto => 'tcp',
+);
+die "Cannot connect to the server $!\n" unless $socket;
+
+# DEFINE $str
+my ($fn, $str, @w);
+if($#ARGV == 0 || $#ARGV == 2){
+	$str=shift();
+} else {
+	# data to send to a server
+	$fn=`LastDataFolder avgraw`;
+	chomp($fn);
+	if( -f $fn ){
+		$str=`tail -1 $fn`;
+		chomp($str);
+		#print"$str\n"; #xx
+		@w=split /[, *]+/, $str;
+		#$ii=0; foreach (@w){print"$ii  $_\n";$ii++} die; #xx
+		$dtr=dtstr2dt($w[1]);
+		#printf"w[1] time %s\n",dtstr($dtr);
+		$dtr=now()-$dtr;
+		$str=sprintf "\$PRP01,%s,$dtr,$w[2],$w[3],$w[4],$w[5],$w[6],$w[7],$w[8],$w[9],$w[10],$w[11],$w[12],$w[13],$w[14]\*",dtstr(now(),'iso');
+	}
+	else{
+		$str=sprintf"\$PRP01,%s,,,,,,,,,,,,,,\*",dtstr(now(),'iso');
+	}
+}
+#print"$str\n";
+
+# make the packet
+#$str='$GPRMC,070951,A,3356.2135,N,13055.5039,E,000.1,051.6,160915,007.1,W*';# == 64';
+
+$str=$str.NmeaChecksum($str)."\r\n";
+print"$serverip $serverport >> $str";
+
+# send packet
+my $size = $socket->send($str);
+
+# notify server that request has been sent
+shutdown($socket, 1);
+
+# receive a response of up to 1024 characters from server
+# my $response = "";
+# $socket->recv($response, 1024);
+# print "received response: $response\n";
+
+# close the socket
+$socket->close();
+
+exit 0;
+ 

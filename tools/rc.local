@@ -16,7 +16,7 @@
 
 echo rc.local boot >> $HOME/tmp/bootlog
 
-bash $HOME/swmain/apps/ROSR/sw/tools/boot_script.sh
+bash $HOME/swmain/apps/PRP/sw/tools/boot_script.sh
 
 
 

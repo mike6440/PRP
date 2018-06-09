@@ -15,7 +15,7 @@ if($#ARGV<0){
 	@x = `find $ENV{DAQDATAFOLDER} -name data_* -print`;
 } else {
 	$dat = $ARGV[0];
-	@x = `find $ENV{DAQDATAFOLDER} -name *$dat* -print`;
+	@x = `find $ENV{DAQDATAFOLDER} -name *$dat_* -print`;
 }
 if( $#x < 0 ){print"0";exit 1}
 print $x[$#x];

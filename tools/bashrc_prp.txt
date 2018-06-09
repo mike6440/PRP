@@ -3,7 +3,6 @@
 #     Start instead of Startprp
 
 
-export PS1='\w/$ '
 export EDITOR="vi"
 alias Top="top -u -s5"
 alias Date='date -u "+%Y %m %d %H %M %S Z"'
@@ -54,22 +53,29 @@ Raw () {
 	# SCREEN
 alias isscreen='screen -ls'  #v10
 alias gtscreen='screen -S PRP -d -r'  #v10
+alias iss='screen -ls'
 
 	# RUN CALLS
 alias G='cd $DAQSWFOLDER;  Z_prp `cat tmp`'
 
 		#START DATA COLLECTION
 Start () {
-    touch ~/tmp/daqstart;
-	KillScreen > /dev/null 2>&1;
-	cd $DAQSWFOLDER;
-	PrepareForRun;
-	export RUNSETUPFILE=`cat tmp`;
-	crontab $DAQSWFOLDER/tools/crontab_prp.txt
-	screen -S PRP -d -m -c $DAQSWFOLDER/tools/screenrc_prp.txt
-	screen -S PRP -p 1 -X stuff "G$(printf \\r)"
-	isscreen
+	ps cax | grep Z_prp > /dev/null   # Z_prp is the app in question		
+	if [ $? -eq 0 ]; then
+		echo "DAQ is already running."
+	else 
+		touch ~/tmp/daqstart;
+		KillScreen > /dev/null 2>&1;
+		cd $DAQSWFOLDER;
+		PrepareForRun > /dev/null;
+		export RUNSETUPFILE=`cat tmp`;
+		crontab $DAQSWFOLDER/tools/crontab_prp.txt
+		screen -S PRP -d -m -c $DAQSWFOLDER/tools/screenrc_prp.txt
+		screen -S PRP -p 1 -X stuff "G$(printf \\r)"
+		isscreen
+	fi
 }
+echo herehere
 
 	#STOP DATA COLLECTION SCREEN
 #alias Stopprp="KillScreen; Stopcron; Cleanupprp;"
@@ -95,6 +101,7 @@ alias Wipe="ClearPrpData";
 cd $DAQSWFOLDER
 
 alias suedit='vim $DAQSWFOLDER/setup/su.txt'
+alias llb="ls -l ~/tmp"
 
 # v10 add reboot capability
 alias bootlog="tail ~/tmp/bootlog"

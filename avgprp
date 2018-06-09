@@ -40,6 +40,25 @@ my $datapath =  FindInfo($setupfile,'RT OUT PATH', ': ');
 if ( ! -d $datapath ) { print"!! RT OUT PATH - ERROR, $datapath\n"; exit 1 }
 #print"debug:datapath = $datapath\n";
 
+#=======================
+# TELNET SERVER
+#======================
+$telnetserverip = FindInfo($setupfile,'TELNET SERVER IP',':');
+#print"TELNET SERVER IP = $telnetserverip\n";
+if($telnetserverip==0){print"No telnet socket output\n"}
+else{
+        $telnetserverport = FindInfo($setupfile,'TELNET SERVER PORT',':');
+        #print"TELNET SERVER PORT = $telnetserverport\n";
+        $socketprogram = FindInfo($setupfile,'TELNET PROGRAM',':');  # v6 udp or sock
+        #print"TELNET PROGRAM = $socketprogram\n";                    # v6
+}
+
+$str="\"PROGRAM: $PROGRAMNAME V$VERSION, Edit $EDITDATE,  RUN  ".dtstr(now(),'short')."\"";
+if($telnetserverip == 0){}
+else{
+        system "$socketprogram $telnetserverip $telnetserverport $str";
+}
+
 	# PSP CAL
 @x=FindLines($setupfile,"% PSP CALIBRATION",1);
 @y=split /[ \t]+/,$x[1];
@@ -201,8 +220,6 @@ for($i=1; $i<=7; $i++){
 $cmd=$cmd.');';
 eval $cmd;
 
-
-
 # CLEAR ACCUMULATOR ARRAYS
 ClearAccumulatorArrays();		# Prepare for averaging first record
 
@@ -215,10 +232,10 @@ $jdold=int($jd[1]);
 @dt=datevec($dt);
 $avgoutfile=sprintf"$datapath/avgout_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
 $rawoutfile=sprintf"$datapath/avgraw_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
-$tmpfile="/tmp/avgprpdebug";
-open D,">>$tmpfile" or die;
-print D "Open debug\n";
-close D;
+# $tmpfile="/tmp/avgprpdebug";
+# open D,">>$tmpfile" or die;
+# print D "Open debug\n";
+# close D;
 
 $Nsweeps=0;
 while ( ReadNextRecord($datapath) == NO ) {};
@@ -229,7 +246,7 @@ AccumulateStats();
 ##==============
 my ($dt_samp,$dt1,$dt2);
 ($dt_samp, $dt1, $dt2) = ComputeSampleEndPoints ( now(), $avgsecs, $SampleFlag);
-#printf"<<NEXT SAMPLE: dt_samp=%s, dt1=%s, dt2=%s>>\r\n", dtstr($dt_samp,'short'), dtstr($dt1,'short'), dtstr($dt2,'short');
+printf"<<NEXT SAMPLE: dt_samp=%s, dt1=%s, dt2=%s>>\r\n", dtstr($dt_samp,'short'), dtstr($dt1,'short'), dtstr($dt2,'short');
 
 #================
 # BEGIN THE MAIN SAMPLING LOOP
@@ -249,7 +266,7 @@ while ( 1 ) {
 		$rawoutfile=sprintf"$datapath/avgraw_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
 		#print"New raw file $rawoutfile\n";
 	}
-
+	
 	#=====================
 	# PROCESS ALL RECORDS IN AVG TIME
 	#=====================
@@ -259,22 +276,21 @@ while ( 1 ) {
 		#---NEW RECORD, CHECK FOR END---
 		if ( $record{dt} >= $dt2 ) { last; }
 		else {		
-# 			AccumulateStats();
+			AccumulateStats();
 		}
 	}
 	#====================
 	# COMPUTE SAMPLE STATS
 	#====================
-# 	ComputeStats();
-# 	
-# 	SaveStats($dt_samp, $datapath);
-# 	$Nsweeps=0;
-# 	if ( $record{mode} == 1 ) {$N_H=1} else {$N_H=0}
-# 	
-# 	ClearAccumulatorArrays();		# Prepare for averaging first record
-# 	($dt_samp, $dt1, $dt2) = ComputeSampleEndPoints( $record{dt}, $avgsecs, 0);	#increment $dt1 and $dt2 
-# 	#v4 printf"NEXT SAMPLE: dt_samp=%s, dt1=%s, dt2=%s\r\n", dtstr($dt_samp,'short'), dtstr($dt1,'short'), dtstr($dt2,'short');
-# 	AccumulateStats(); 			# deals with the current record
+	ComputeStats();	
+	SaveStats($dt_samp, $datapath);
+	$Nsweeps=0;
+	if ( $record{mode} == 1 ) {$N_H=1} else {$N_H=0}
+	
+	ClearAccumulatorArrays();		# Prepare for averaging first record
+	($dt_samp, $dt1, $dt2) = ComputeSampleEndPoints( $record{dt}, $avgsecs, 0);	#increment $dt1 and $dt2 
+	#v4 printf"NEXT SAMPLE: dt_samp=%s, dt1=%s, dt2=%s\r\n", dtstr($dt_samp,'short'), dtstr($dt1,'short'), dtstr($dt2,'short');
+	AccumulateStats(); 			# deals with the current record
 	#=======================
 	# END OF THE LOOP
 	#=======================
@@ -428,9 +444,6 @@ sub ReadNextRecord
 		open F,">>$rawoutfile" or die;
 		print F "$str\n";
 		print "$str\n";  #-->> PRINT WIPRR
-open D,">>$tmpfile" or die;
-print D "$str\n";
-close D;
 				# CHANGE INPUT TYPE -- HIGH TO LOW		
 		if ( $record{mode}==0 && $N_H > 0) {
 			print"Begin low input, reset Accumulators\n";
@@ -477,9 +490,9 @@ close D;
 			$str=$str.NmeaChecksum($str);
 			print F " $str\n";		
 			print " $str\n";  #-->> PRINT WIPRG
-open D,">>$tmpfile" or die;
-print D " $str\n";
-close D;
+# open D,">>$tmpfile" or die;
+# print D " $str\n";
+# close D;
 			$N_H++;
 				
 				# HIGH -- SHADOW
@@ -501,9 +514,9 @@ close D;
 					$str=$str.NmeaChecksum($str);
 					print F " $str\n";
 					print " $str\n";  #-->> PRINT WIPR1...WIPR7
-open D,">>$tmpfile" or die;
-print D " $str\n";
-close D;
+# open D,">>$tmpfile" or die;
+# print D " $str\n";
+# close D;
 				}
 			}
 		}
@@ -599,6 +612,10 @@ sub SaveStats
 	my ($i,$j,$glavg);
 	my ($Thead, $pitch,$pstd,$roll,$rstd);
 	my @wmn=();  @wstd=();
+
+	$str="Begin SaveStats";
+	if($telnetserverip == 0){}
+	else{system "$socketprogram $str"}   # v6
 	
 	## STANDARD OUT FILE
 	open(F,">>$avgoutfile") or die;
@@ -633,9 +650,7 @@ sub SaveStats
 # 1710 1714 1719 1720 1719 1722 1720 1698 793 66 40 34 87 1179 1703 1710 1714 1711 0 0 0 0 0 
 # 1949 1979 2000 2005 1998 1993 1986 1957 1042 245 212 203 255 1369 1947 1956 1963 1959 0 0 0 0 0 
 # 1750 1778 1799 1805 1798 1793 1786 1759 960 225 190 178 227 1198 1744 1755 1760 1756 0 0 0 0 0
-
-
-
+	
 	$Thead = $samp_a000{mn};
 	
 		# HORIZON MEANS
@@ -678,6 +693,10 @@ sub SaveStats
 		printf "<<%s>>\r\n", $str;  ## output to terminal
 		printf F "%s\n", $str;  ## to output file
 		
+			# choose program
+		if($telnetserverip == 0){}
+		else{system "$socketprogram $str"}   # v6
+	
 		# GLOBAL_1 averages
 		$str='';
 		for($i=25; $i<=30; $i++) { 

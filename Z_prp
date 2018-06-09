@@ -69,7 +69,7 @@ proc SpawnPrp { } {
 		# carrier watch
 	send "set carrier-watch off\r"
 	expect ">>"
-	## CONNECT 
+		# CONNECT 
 	send "connect\r"
 	expect {
 		"Conn*---" { write_info "SERIAL CONNECTED TO $usbport"; }  
@@ -117,7 +117,7 @@ proc SpawnCom2 { } {
 			# carrier watch
 		send "set file type binary\r"
 		expect ">>"
-		## CONNECT 
+			# CONNECT 
 		send "connect\r"
 		expect {
 			"Conn*---" { write_info "COM2 CONNECTED TO $usbport"; }  
@@ -255,7 +255,7 @@ while 1 {
 			set rawstr $expect_out(0,string);
 			#send_user "<<$rawstr>>\n"
 			set datstr [exec DecodePacket $rawstr];
-			send_user "$datstr\n"
+			#send_user "$datstr\n"
 				# SAVE DECODE  v13
 			set strd [timestamp -gmt -format "%Y%m%dT%H%M%SZ "]$datstr
 			set P [open $decodename a 0600];
