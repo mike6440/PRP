@@ -3,16 +3,13 @@
 # The program uses `cat tmp` as the setup file.
 
 my $PROGRAMNAME = 'avgprp';
-my $VERSION = '03';  
-my $EDITDATE = '180511';
+my $VERSION = '05.1';  
+my $EDITDATE = '180611,1026';
 
 #v01 -- taken from avgrsr v7
 #v02 -- 
 #v03 -- clean up for new version of PrepareForRun
-
-@NL =(8,30);
-@NH=(8,46);
-#@NHsweeps=(8,207);
+#v05 -- averaging and sockett
 
 $record{mode}=0;
 $Nsweeps=0;
@@ -211,7 +208,10 @@ use constant NO => 0;
 use constant PI => 3.14159265359;
 
 
-my $cmd = "\@VARS = ('a000'";
+# DEFINE VARS  VARS='p' -> sum_p{sum sumsq,max,min,n} -> samp_p
+@VARS = ('thead','shadow','sw','lw','psp','pir','tcase','tdome','p','r','az','batt');
+@VARS = (@VARS,'g1','g2','g3','g4','g5','g6','g7');
+my $cmd = "\@VARS = (\@VARS,'a000'";
 for($i=1; $i<=7; $i++){
 	for($j=1; $j<=23; $j++){
 		$cmd=$cmd.sprintf ",'a%d%02d'",$i,$j;
@@ -219,7 +219,7 @@ for($i=1; $i<=7; $i++){
 }
 $cmd=$cmd.');';
 eval $cmd;
-
+#$ii=0;foreach(@VARS){print "$ii  $_\n"; $ii++} die;
 # CLEAR ACCUMULATOR ARRAYS
 ClearAccumulatorArrays();		# Prepare for averaging first record
 
@@ -238,7 +238,13 @@ $rawoutfile=sprintf"$datapath/avgraw_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
 # close D;
 
 $Nsweeps=0;
-while ( ReadNextRecord($datapath) == NO ) {};
+while ( 1 ) {
+	$ix=ReadNextRecord($datapath);
+	if($ix == 1 ) {last}
+};
+# $str="First record";  print"$str\n";
+# system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
+
 AccumulateStats();
 
 ##=================
@@ -246,7 +252,7 @@ AccumulateStats();
 ##==============
 my ($dt_samp,$dt1,$dt2);
 ($dt_samp, $dt1, $dt2) = ComputeSampleEndPoints ( now(), $avgsecs, $SampleFlag);
-printf"<<NEXT SAMPLE: dt_samp=%s, dt1=%s, dt2=%s>>\r\n", dtstr($dt_samp,'short'), dtstr($dt1,'short'), dtstr($dt2,'short');
+$str=sprintf"<<NEXT SAMPLE: dt_samp=%s, dt1=%s, dt2=%s>>\n", dtstr($dt_samp,'short'), dtstr($dt1,'short'), dtstr($dt2,'short');
 
 #================
 # BEGIN THE MAIN SAMPLING LOOP
@@ -266,23 +272,31 @@ while ( 1 ) {
 		$rawoutfile=sprintf"$datapath/avgraw_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
 		#print"New raw file $rawoutfile\n";
 	}
-	
 	#=====================
 	# PROCESS ALL RECORDS IN AVG TIME
 	#=====================
  	while ( 1 ) {
 		#---READ NEXT RECORD (loop)---
-		while ( ReadNextRecord($datapath) == NO )	{}
+		while ( 1 )	{
+			$ix=ReadNextRecord($datapath);
+			if($ix == 1 ) {last}
+		}
 		#---NEW RECORD, CHECK FOR END---
 		if ( $record{dt} >= $dt2 ) { last; }
 		else {		
 			AccumulateStats();
+# $str="Line 284";  print"$str\n";
+# system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 		}
 	}
 	#====================
 	# COMPUTE SAMPLE STATS
 	#====================
+# $str="Line 291";  print"$str\n";
+# system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 	ComputeStats();	
+		#xx debug
+	
 	SaveStats($dt_samp, $datapath);
 	$Nsweeps=0;
 	if ( $record{mode} == 1 ) {$N_H=1} else {$N_H=0}
@@ -301,7 +315,7 @@ exit(0);
 #*************************************************************/
 sub ReadNextRecord
 {
-	my ($datapath, $rawout) = @_;
+	my ($datapath) = @_;
 	
 	my ($n, $str, $cmd ,$dtrec, $Nfields, $ftmp, $i, $j, $x);
 	my @r;
@@ -315,8 +329,22 @@ sub ReadNextRecord
 	print"PRP--\n";
 	chomp($str=<STDIN>);
 	
-	# NOISE 
-	if (length($str) < 50) { return (NO) }
+# timestamp   mode thead pitch1 roll1 az1 adc10 adc11 adc12 adc13 adc14 adc15 adc16 adc17 pitch2 roll2 az2 adc20 adc21 adc22 adc23 adc24 adc25 adc26 adc27
+#             0    1     2      3     4   5     6     7     8     9     10    11    12    13     14    15  16    17    18    19    20    21    22    23
+
+# shadow threshold g11 g12 g13 g14 g15 g16 g17 g21 g22 g23 g24 g25 g26 g27
+#   24      25     26  27  28  29  30  31  32  33  34  35  36  37  38  39 
+
+# s01 s02 ... s23  
+#  (40  41     62)   (63...85)  (86...108)  (109... 131)  (132...154) (155...177) (178...200)
+# 
+# Low mode # 0...23
+# High, no shadow # 0...39
+# High with shadow # 200
+	# short strings 
+	if (length($str) < 50) { 
+		return (0) 
+	}
 	else {
 		@av=();
 		## COMMANDS
@@ -335,9 +363,11 @@ sub ReadNextRecord
 		$record{mode}=$r[0];
 		$record{thead}=$r[1];
 		if($r[0]>0){$record{shadow}=$r[24]}else{$record{shadow}=0}
-	
-			# pitch and roll
-		for($i=2; $i<=3; $i++){
+		#==============
+		# AVERAGE AT EACH HORIZON
+		#==============
+		# PITCH, ROLL, AZ
+		for($i=2;$i<=3;$i++){
 			$n=0; $x=0;
 			if($r[$i]>-20 && $r[$i]<20){
 				$n++; $x=$r[$i];
@@ -348,21 +378,8 @@ sub ReadNextRecord
 			if($n==0){$x=$missing} else{$x=$x/$n}
 			push @av,$x;
 		}
-			# azimuth
-		$i=4;
-			$n=0; $x=0;
-			if($r[$i]>=0 && $r[$i]<=360){
-				$n++; $x=$r[$i];
-			}
-			if($r[$i+11]>=0 && $r[$i+11]<=360){
-				$n++; $x+=$r[$i+11];
-			}
-			if($n==0){$x=$missing} else{$x=$x/$n}
-			push @av,$x;
-
-	
-			# 16 bit ADC
-		for($i=5; $i<=12; $i++){
+		# 16 bit ADC
+		for($i=4; $i<=12; $i++){
 			$n=0; $x=0;
 			if($r[$i]>-100 && $r[$i]<4000){
 				$n++; $x=$r[$i];
@@ -373,8 +390,11 @@ sub ReadNextRecord
 			if($n==0){$x=$missing} else{$x=$x/$n}
 			push @av,$x;
 		}
-		#$i=0; foreach(@av){printf"debug:%3d %.3f\n",$i,$_; $i++}
-	
+		#$i=0; foreach(@av){printf"debug:%3d %.3f\n",$i,$_; $i++} die;
+		#==============
+		# FILL IN RECORD
+		#==============
+		# p,r,az
 		if($fixedtiltflag == 0){
 			%record=(%record,
 				p => $av[0]+$pitchcorrection,
@@ -389,6 +409,7 @@ sub ReadNextRecord
 				az => $fixedheading+0.0001
 			);
 		}
+		# radiometers
 		%record=(%record,
 			psp => $av[3],
 			pirv => $av[4],
@@ -423,6 +444,7 @@ sub ReadNextRecord
 	
 		@x = ComputeLongwave($record{pir},$record{tcase},$record{tdome},$Kcoefficient,$sigma,$epsilon,$missing);
 		$record{lw}=$x[0];
+#@VARS = ('thead','shadow','sw','lw','psp','pir','tcase','tdome','p','r','az','batt');
 	
 # 		printf"mode = %d\n", $record{mode};
 # 		printf"Thead = %.2f\n", $record{thead};
@@ -443,7 +465,9 @@ sub ReadNextRecord
 		$str=$str.NmeaChecksum($str);
 		open F,">>$rawoutfile" or die;
 		print F "$str\n";
-		print "$str\n";  #-->> PRINT WIPRR
+		#print "$str\n";  #-->> PRINT WIPRR
+# $str =~ s/\$//;
+# system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 				# CHANGE INPUT TYPE -- HIGH TO LOW		
 		if ( $record{mode}==0 && $N_H > 0) {
 			print"Begin low input, reset Accumulators\n";
@@ -462,11 +486,10 @@ sub ReadNextRecord
 			eval($cmd);
 		}
 		#===================
-		# FILL RECORD ARRAY
+		# FILL RECORD ARRAY, HIGH MODE
 		#===================
-				# HIGH MODE -- 
 		if ( $record{mode}==1 ) {
-			## GLOBAL 
+			# GLOBAL 
 			for($i=26; $i<=32; $i++){
 				$n=0; $x=0;
 				if($r[$i]>0 && $r[$i]<4000){
@@ -479,7 +502,7 @@ sub ReadNextRecord
 				$cmd=sprintf"\$record{g%d}=\$x;",$i-25;
 				eval $cmd;
 			}
-				# PRINT OUT
+			# PRINT OUT
 			$str=sprintf"\$WIPRG,%s,%.1f",$timestamp,$record{shadow};
 			for($i=1; $i<=7; $i++){
 				$cmd=sprintf"\$str=\$str.sprintf\",%%.1f\",\$record{g%d};",$i;
@@ -490,9 +513,8 @@ sub ReadNextRecord
 			$str=$str.NmeaChecksum($str);
 			print F " $str\n";		
 			print " $str\n";  #-->> PRINT WIPRG
-# open D,">>$tmpfile" or die;
-# print D " $str\n";
-# close D;
+# $str=~s/\$//;
+# system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 			$N_H++;
 				
 				# HIGH -- SHADOW
@@ -513,16 +535,15 @@ sub ReadNextRecord
 					$str=$str."*";
 					$str=$str.NmeaChecksum($str);
 					print F " $str\n";
-					print " $str\n";  #-->> PRINT WIPR1...WIPR7
-# open D,">>$tmpfile" or die;
-# print D " $str\n";
-# close D;
+					#print " $str\n";  #-->> PRINT WIPR1...WIPR7
+# $str=~s/\$//;
+# system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 				}
 			}
 		}
 		close F;
-		return (YES);
 	}
+	return (1);
 }
 
 #*************************************************************/
@@ -603,7 +624,8 @@ sub ComputeStats
 
 #*************************************************************/
 sub SaveStats
-## Create a string with all the data then save the string to file and print out with framing
+## Create a string with all the data then save the string to file and print out 
+# with framing
 {
 	my ($dt, $path) = @_;
 	my $modecommand=1;
@@ -613,129 +635,56 @@ sub SaveStats
 	my ($Thead, $pitch,$pstd,$roll,$rstd);
 	my @wmn=();  @wstd=();
 
-	$str="Begin SaveStats";
-	if($telnetserverip == 0){}
-	else{system "$socketprogram $str"}   # v6
+	# use sw for threshold
+	$glavg = $samp_sw{mn};
+	# PRP SHUTOFF FLAG
+	if( ($shutdownflag && $glavg < $shutdownthreshold) || $glavg == $missing )
+		{$modecommand = 0} 			# GLAVG LOW, TURN FRSR OFF
+	else {$modecommand = -1} 	# GLAVG HIGH OR SHUTDOWNFLAG =0, DO NOTHING , v6a
+		
 	
 	## STANDARD OUT FILE
 	open(F,">>$avgoutfile") or die;
 
-#                                                       psp	  pir   tcas tdom  sp    sp    sp    sp                     psp    psp
-# nrec yyyy MM dd hh mm ss mode thead pitch1 roll1 az1 adc10 adc11 adc12 adc13 adc14 adc15 adc16 adc17 pitch2 roll2 az2 adc20 adc21 adc22 adc23 adc24 adc25 adc26 adc27
-#r  0    1   2  3  4  5   6  7    8     9     10     11    12  13     14   15   16    17    18    19    20      21    22    23  24    25     26    27    28    29   30
-#a                                0     1     2       3     4                                     11    12      13                                                  22
-
-# shadow threshold  g12 g13 g14 g15 g16 g17 g22 g23 g24 g25 g26 g27
-#r   31    32       33  34  35  36  37  38  39  40  41  42  43  44 
-#a   23    24       25  26              30  31  32  33          36
-
-# s01 s02 ... s23
-#r (45...67)   (68...90)  (91...113)  (114...136)  (137...161) (162...182) (183...205)
-#a (37...59)   (60...82)  (83...105)  (106...128)  (129...151) (152...174) (175...197)                                                    (177..199)
-
-# @NL =(8,30);
-# @NH=(8,46);
-# @NHsweeps=(8,207);
-# an example sweep
-# 4 2014 09 13 18 19 14 1   39.8  
-# -4.0 -2.0 4.6   3.19 -35.23 189.37 185.80 30.94 29.26 377.80 521.77   
-# -4.0 -2.0 5.7   3.19 -35.15 189.23 185.44 10.70 10.70 377.82 521.85   
-# 47.4 2.3 
-# 147.2 97.9 112.0 136.5 170.3 194.7
-# 148.0 98.3 112.4 137.0 171.1 195.9 
-# 1475 1488 1499 1501 1499 1499 1494 1475 764 146 121 118 156 1016 1471 1478 1482 1480 0 0 0 0 0 
-# 977 964 958 959 960 969 979 967 501 97 85 64 108 676 972 984 988 983 0 0 0 0 0 
-# 1120 1115 1114 1115 1114 1120 1123 1110 520 63 50 35 80 787 1116 1124 1129 1124 0 0 0 0 0 
-# 1366 1365 1366 1367 1366 1370 1371 1353 615 51 32 21 73 953 1361 1369 1374 1370 0 0 0 0 0 
-# 1710 1714 1719 1720 1719 1722 1720 1698 793 66 40 34 87 1179 1703 1710 1714 1711 0 0 0 0 0 
-# 1949 1979 2000 2005 1998 1993 1986 1957 1042 245 212 203 255 1369 1947 1956 1963 1959 0 0 0 0 0 
-# 1750 1778 1799 1805 1798 1793 1786 1759 960 225 190 178 227 1198 1744 1755 1760 1756 0 0 0 0 0
+	# OUT PUT HIGH OR LOW
+	 #20180612,132200, 9, Vin 13.9, Th 39.76(0.05), SW 134.04(0.89), LW 360.48(0.08), 
+	 #pitch 1.0(0.0), roll 0.0(0.0), 0
+	$strout=sprintf"%s, %d, Vin %.1f, Th %.2f(%.2f), SW %.2f(%.2f), LW %.2f(%.2f), ".
+	"pitch %.1f(%.1f), roll %.1f(%.1f), %d" ,
+	dtstr($dt_samp,'short'), $N_H, $samp_batt{mn},
+	$samp_thead{mn},$samp_thead{std},$samp_sw{mn},$samp_sw{std},$samp_lw{mn},$samp_lw{std},
+	$samp_p{mn},$samp_p{std},$samp_r{mn},$samp_r{std},
+	$modecommand;
+if($telnetserverip == 0){}else{system "$socketprogram $telnetserverip $telnetserverport \"$strout\""}
+	printf F "%s\n", $strout;  ## to output file
 	
-	$Thead = $samp_a000{mn};
-	
-		# HORIZON MEANS
-		# MEAN,STD - pitch,roll,az,adc0,...adc7
-	for($i=1; $i<12; $i++){
-		$cmd = sprintf( "push(\@wmn, 0.5 * (\$samp_a%03d{mn} + \$samp_a%03d{mn} ));",$i,$i+11);
-		eval($cmd);
-		# mean std ~ 1/sqrt(2) 
-		$cmd = sprintf( "push(\@wstd, 0.353 * (\$samp_a%03d{std} + \$samp_a%03d{std}));",$i,$i+11);
-		eval $cmd;
-	}
-		# use psp for threshold
-	$glavg = $wmn[3];
-	#printf"glavg = %.0f\n", $glavg;
+	# HIGH MODE - OUTPUT
+	if ($N_H >= $Nsamp_min ) {		
+		# GLOBAL
+		 #  Shad 3.1(1.2), Globals 317.4(119.0), 281.8(105.7), 276.9(103.9), 
+		 #320.4(120.2), 415.2(155.7), 392.9(147.4), 333.3(125.0)
+  		$strout=sprintf "  Shad %.1f(%.1f), Globals %.1f(%.1f), %.1f(%.1f), %.1f(%.1f), %.1f(%.1f), %.1f(%.1f), %.1f(%.1f), %.1f(%.1f)",
+		$samp_shadow{mn},$samp_shadow{std},$samp_g1{mn},$samp_g1{std},
+		$samp_g2{mn},$samp_g2{std},$samp_g3{mn},$samp_g3{std},
+		$samp_g4{mn},$samp_g4{std},$samp_g5{mn},$samp_g5{std},
+		$samp_g6{mn},$samp_g6{std},$samp_g7{mn},$samp_g7{std}; 
+if($telnetserverip == 0){}else{system "$socketprogram $telnetserverip $telnetserverport \"$strout\""}
+		printf F "%s\n", $strout;  ## to output file
 
-
-	
-			# HIGH MODE - OUTPUT
-	if ($N_H >= $Nsamp_min ) {
-	
-			# AVERAGE GLOBALS - (25,32) (26,33)...
-		my @gl=();
-		for($i=25; $i<=30; $i++){
-			$cmd = sprintf( "push(\@gl, 0.5 * (\$samp_a%03d{mn} + \$samp_a%03d{mn} );",$i,$i+6);
-			eval($cmd);
-		}
-		
-				# PRP SHUTOFF FLAG
-		if( ($shutdownflag && $glavg < $shutdownthreshold) || $glavg == $missing )
-			{$modecommand = 0} 			# GLAVG LOW, TURN FRSR OFF
-			else {$modecommand = -1} 	# GLAVG HIGH OR SHUTDOWNFLAG =0, DO NOTHING , v6a
-		
-				# OUT        time  thead glavg thold Nsweeps shad std thres pitch,pstd, roll,rstd,  psp, pir,tcase,tdome, modecommand
-		$str = sprintf"PRAVH %s   %.1f   %.1f %.1f   %d %.1f %.1f %.1f   %.1f %.1f  %.1f %.1f   %.3f %.3f %.3f %.3f  %d", 
-			$timestr,$samp_a000{mn}, $glavg, $shutdownthreshold, 
-			$Nsweeps, $samp_a023{mn}, $samp_a023{std}, $samp_a024{mn}, 
-			$wmn[0], $wstd[0], $wmn[1], $wstd[1], 
-			$wmn[3], $wmn[4],$wmn[5], $wmn[6], $modecommand;
-		#<<PRAV 2014 09 13 20 00 00   39.8   3.2 100.0   49 0.0 2.3 -4.0   0.0 -2.0  0.0 3.2   -35.4 0.0  0>>
-		printf "<<%s>>\r\n", $str;  ## output to terminal
-		printf F "%s\n", $str;  ## to output file
-		
-			# choose program
-		if($telnetserverip == 0){}
-		else{system "$socketprogram $str"}   # v6
-	
-		# GLOBAL_1 averages
-		$str='';
-		for($i=25; $i<=30; $i++) { 
-			eval(sprintf("\$str = \$str.sprintf \" %%6.1f\",\$samp_a%03d{mn};",$i));
-		}
-		print F "$str\n";
-		
-		# GLOBAL_2 averages
-		$str='';
-		for($i=31; $i<=36; $i++) { 
-			eval(sprintf("\$str = \$str.sprintf \" %%6.1f\",\$samp_a%03d{mn};",$i));
-		}
-		print F "$str\n";
-		
 		# SWEEP BINS
-		my $k=37;
-		for($j=0; $j<7; $j++) {
-			$str='';
-			for($i=0; $i<23; $i++) { 
-				eval(sprintf("\$str = \$str.sprintf \" %%6.1f\", \$samp_a%03d{mn};",$k));
-				$k++;
+		# note naming -- aji, j=1..7, i=01..23, 'a%d%02d'",$j,$i;
+		if($samp_shadow{mn} >= $ShadowRatioThreshold) {
+			for($j=0; $j<7; $j++) {
+				$str='';
+				for($i=0; $i<23; $i++) { 
+					eval(sprintf("\$str = \$str.sprintf \" %%6.1f\", \$samp_a%d%02d{mn};",$j,$i));
+				}
+				print F "$str\n";
+				print "$str\n";
+if($telnetserverip == 0){}else{system "$socketprogram $telnetserverip $telnetserverport \"$str\""}
 			}
-			print F "$str\n";
 		}
-		
-			# LOW MODE OPERATION
-	} else {	
-				# PRP SHUTOFF FLAG
-		if( ($shutdownflag && $glavg > $shutdownthreshold) && $glavg > $missing )
-			{$modecommand = 1} 			# GLAVG HIGH, TURN FRSR ON
-			else {$modecommand = -1} 	# GLAVG LOW OR SHUTDOWNFLAG =0, DO NOTHING.
-		
-				# OUT      time  thead glavg thold  pitch,pstd, roll,rstd,  psp, pir, tcase, tdome, modecommand
-		$str = sprintf"PRAVL %s   %.1f   %.1f %.1f   %.1f %.1f  %.1f %.1f   %.3f %.3f %.3f %.3f  %d", 
-			$timestr,$samp_a000{mn}, $glavg, $shutdownthreshold, 
-			$wmn[0], $wstd[0], $wmn[1], $wstd[1], 
-			$wmn[3], $wmn[4],$wmn[5], $wmn[6], $modecommand;
-		printf "<<%s>>\r\n", $str;  ## output to terminal
-		printf F "%s\n", $str;  ## to output file
 	}
 	close F;
+	return 1;
 }

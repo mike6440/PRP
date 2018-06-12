@@ -40,7 +40,8 @@ my $socket = new IO::Socket::INET (
     PeerPort => $serverport,
     Proto => 'tcp',
 );
-die "Cannot connect to the server $!\n" unless $socket;
+#die "Cannot connect to the server $!\n" unless $socket;
+die "0" unless $socket;
 
 # DEFINE $str
 my ($fn, $str, @w);
@@ -70,8 +71,12 @@ if($#ARGV == 0 || $#ARGV == 2){
 # make the packet
 #$str='$GPRMC,070951,A,3356.2135,N,13055.5039,E,000.1,051.6,160915,007.1,W*';# == 64';
 
-$str=$str.NmeaChecksum($str)."\r\n";
-print"$serverip $serverport >> $str";
+if(substr($str,-1) =~ /\*/){
+	$str=$str.NmeaChecksum($str)."\n";
+} else {
+	$str=$str."\n";
+} 
+#print"$serverip $serverport >> $str";
 
 # send packet
 my $size = $socket->send($str);

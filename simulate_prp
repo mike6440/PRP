@@ -5,7 +5,7 @@ use lib $ENV{MYLIB};
 use perltools::MRtime;
 #use Device::SerialPort qw( :PARAM :STAT 0.07 );
 
-$fin="simulate/prp11.txt";
+$fin="simulate/prpraw_180611.txt";
 
 my $irec = 0;
 my ($i1,$narg,$p);

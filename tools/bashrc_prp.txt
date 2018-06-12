@@ -75,8 +75,6 @@ Start () {
 		isscreen
 	fi
 }
-echo herehere
-
 	#STOP DATA COLLECTION SCREEN
 #alias Stopprp="KillScreen; Stopcron; Cleanupprp;"
 alias Stop="rm ~/tmp/daqstart > /dev/null 2>&1; KillScreen > /dev/null 2>&1; Stopcron > /dev/null 2>&1; Cleanupprp > /dev/null 2>&1; echo 'DAQ Stopped'; echo 'DAQ Stopped' >> $HOME/tmp/bootlog"
