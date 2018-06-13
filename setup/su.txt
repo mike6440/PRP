@@ -1,12 +1,13 @@
 	THIS FILE NAME: su_prp7_1805.txt
 	Editdate: 20180612T151941Z
-   	#simulate 1, standard com 0
+   	#!! simulate 1, standard com 0
 SIMULATEFLAG: 1
 PRP SERIAL NUMBER: 7
 RS232 FLAG: 1
     This file will be set with the START command.
 RT OUT PATH: ../data
 THIS FILE: tbd
+======== COMMS =============================
 TELNET PROGRAM: socktxx
 TELNET SERVER IP: 10.1.10.86
 TELNET SERVER PORT: 5555
@@ -20,6 +21,7 @@ HEIGHT ABOVE SEA LEVEL M: 30
 PRP COMMENTS:
   180507 Craig Webb ARM did a calibration
 END
+========== TILT AZ ==============================
   # FIXED LOCATION
 FIXED TILT FLAG: 0
 TCM FIXED PITCH: 0
@@ -29,7 +31,7 @@ TCM FIXED HEADING: 0
 TCM PITCH CORRECTION: 0
 TCM ROLL CORRECTION: 0
 TCM HEADING CORRECTION: 0
-  # THRESHOLDS
+========= THRESHOLDS ================================
 PRP SHADOW THRESHOLD: 20
   # If shutdownflag == 1 and avg from $shutdownchannel < $shutdownthreshold == go to LOW
 PRP SHUTDOWN CONTROL: 1
@@ -41,7 +43,8 @@ MISSING VALUE:-999
   # path to cal files relative to sw
 CALIBRATION PATH: setup/prp7
   # cal files names inside calibration path folder
-PRP INFO: INFO.txt
+PRP INFO: INFO_07_1805.txt
+PRP CAL FILE: prprx_07_1805.txt
 HEAD ZE CAL: sol.txt
-PRP CAL FILE: prprx.txt
 HEAD BANDPASS: spn.txt
+============ END SETUP =====================================

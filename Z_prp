@@ -255,9 +255,10 @@ while 1 {
 			set rawstr $expect_out(0,string);
 			#send_user "<<$rawstr>>\n"
 			set datstr [exec DecodePacket $rawstr];
+			send_user "$datstr\n"
 			# debug send first 101 chars
-			set str [ string range $datstr 0 100]
-			send_user "decode $str\n"
+			#set str [ string range $datstr 0 100]
+			#send_user "$str ...\n"
 				# SAVE DECODE  v13
 			set strd [timestamp -gmt -format "%Y%m%dT%H%M%SZ "]$datstr
 			set P [open $decodename a 0600];
@@ -273,7 +274,7 @@ while 1 {
 			send "$datstr\r\n"
 		}
 		-i $PRPAV
-		"WIPRR*\n" { send_user "$expect_out(0,string)\n"}
+		"WIPRR*\n" { send_user "->$expect_out(0,string)\n"}
 		timeout {send_user "timeout1\n"}
 	}
 }
