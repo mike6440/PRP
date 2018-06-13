@@ -465,9 +465,9 @@ sub ReadNextRecord
 		$str=$str.NmeaChecksum($str);
 		open F,">>$rawoutfile" or die;
 		print F "$str\n";
-		#print "$str\n";  #-->> PRINT WIPRR
-# $str =~ s/\$//;
-# system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
+# 		print "$str\n";  #-->> PRINT WIPRR
+$str =~ s/\$//;
+system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 				# CHANGE INPUT TYPE -- HIGH TO LOW		
 		if ( $record{mode}==0 && $N_H > 0) {
 			print"Begin low input, reset Accumulators\n";
