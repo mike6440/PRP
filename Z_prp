@@ -19,7 +19,7 @@ set EDITDATE 180517
 log_user 0  ;# 0-quiet, 1=verbose
 
 
-global PRP PRPPID PRPAV PRPAVPID  Finfo  Fraw setupfile  COM2 COM2PID
+global PRP PRPPID PRPAV PRPAVPID  Finfo  Fraw setupfile # COM2 COM2PID
 
 #========================================================
 #		PROCEDURE TO SIMULATE PRP -- v12
@@ -79,66 +79,66 @@ proc SpawnPrp { } {
 #========================================================
 		# RS232 COM2
 #============================================================
-proc SpawnCom2 { } {
-	global COM2 COM2PID
-		# Find the USB port
-	set usbport [exec perl FindUSBPort 2]
-		# NO COM2 PORT
-	if { [string length $usbport] < 3 } { 
-		send_user "com2: tty missing\n";
-		set COM2PID 0
-		set COM2 0
-	} else {
-			# START PROCESS -- KERMIT FOR RS232
-		set COM2PID [spawn kermit]
-		set COM2 $spawn_id
-		set timeout 2
-		expect {
-			timeout {"COM2 KERMIT FAILS TO OPEN\n"; exit 1}
-			">>"
-		}
-		write_info "SPAWN COM2 KERMIT, spawn_id = $COM2,  pid = $COM2PID"
-			# OPEN line
-		send "set line $usbport\r"
-		expect ">>"
-		write_info "RS232 CONNECT TO $usbport"
-			# speed
-		send "set speed 9600\r"
-		expect ">>"
-			# duplex
-		send "set duplex full\r"
-		expect ">>"
-			# flow control
-		send "set flow none\r"
-		expect ">>"
-			# carrier watch
-		send "set carrier-watch off\r"
-		expect ">>"
-			# carrier watch
-		send "set file type binary\r"
-		expect ">>"
-			# CONNECT 
-		send "connect\r"
-		expect {
-			"Conn*---" { write_info "COM2 CONNECTED TO $usbport"; }  
-			timeout {send_user "COM2 SERIAL TIMEOUT, NO CONNECT"; exit 1}
-		}
-	}
-}
+# proc SpawnCom2 { } {
+# 	global COM2 COM2PID
+# 		# Find the USB port
+# 	set usbport [exec perl FindUSBPort 2]
+# 		# NO COM2 PORT
+# 	if { [string length $usbport] < 3 } { 
+# 		send_user "com2: tty missing\n";
+# 		set COM2PID 0
+# 		set COM2 0
+# 	} else {
+# 			# START PROCESS -- KERMIT FOR RS232
+# 		set COM2PID [spawn kermit]
+# 		set COM2 $spawn_id
+# 		set timeout 2
+# 		expect {
+# 			timeout {"COM2 KERMIT FAILS TO OPEN\n"; exit 1}
+# 			">>"
+# 		}
+# 		write_info "SPAWN COM2 KERMIT, spawn_id = $COM2,  pid = $COM2PID"
+# 			# OPEN line
+# 		send "set line $usbport\r"
+# 		expect ">>"
+# 		write_info "RS232 CONNECT TO $usbport"
+# 			# speed
+# 		send "set speed 9600\r"
+# 		expect ">>"
+# 			# duplex
+# 		send "set duplex full\r"
+# 		expect ">>"
+# 			# flow control
+# 		send "set flow none\r"
+# 		expect ">>"
+# 			# carrier watch
+# 		send "set carrier-watch off\r"
+# 		expect ">>"
+# 			# carrier watch
+# 		send "set file type binary\r"
+# 		expect ">>"
+# 			# CONNECT 
+# 		send "connect\r"
+# 		expect {
+# 			"Conn*---" { write_info "COM2 CONNECTED TO $usbport"; }  
+# 			timeout {send_user "COM2 SERIAL TIMEOUT, NO CONNECT"; exit 1}
+# 		}
+# 	}
+# }
 #========================================================
 		# SEND COM2
 #============================================================
-proc SendCom2 { str } {
-	global COM2 COM2PID
-	if {$COM2 == 0} {
-		#send_user "com2: $str\n";
-	} else {
-		#set oldid $spawn_id
-		#set spawn_id $COM2
-		send -i $COM2 "$str\r\n";
-	}
-	
-}
+# proc SendCom2 { str } {
+# 	global COM2 COM2PID
+# 	if {$COM2 == 0} {
+# 		#send_user "com2: $str\n";
+# 	} else {
+# 		#set oldid $spawn_id
+# 		#set spawn_id $COM2
+# 		send -i $COM2 "$str\r\n";
+# 	}
+# 	
+# }
 #======================================
 #   PROCEDURE TO START AVGPRP PROGRAM
 #==================================
@@ -214,7 +214,7 @@ if { $simulateflag == 1 } {
 	# START AVG PROGRAM
 SpawnAvgPrp; 
 	# OPEN COM2
-SpawnCom2;
+# SpawnCom2;
 
 set force_rsr_standby  0   ;# start in operation mode
 set ktemp 1                ;# start with temp standby flag in operate mode.
@@ -230,7 +230,7 @@ set timeraw [timestamp -gmt]
 set day0 0 ;# to initiate the first raw file
 set Nrecs 0
 
-SendCom2  "Main Loop";
+# SendCom2  "Main Loop";
 	# START LOOP
 while 1 {
 	set dt [timestamp -gmt]
@@ -255,7 +255,7 @@ while 1 {
 			set rawstr $expect_out(0,string);
 			#send_user "<<$rawstr>>\n"
 			set datstr [exec DecodePacket $rawstr];
-			send_user "$datstr\n"
+			#send_user "$datstr\n"
 			# debug send first 101 chars
 			#set str [ string range $datstr 0 100]
 			#send_user "$str ...\n"

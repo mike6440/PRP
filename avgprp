@@ -3,8 +3,8 @@
 # The program uses `cat tmp` as the setup file.
 
 my $PROGRAMNAME = 'avgprp';
-my $VERSION = '05.1';  
-my $EDITDATE = '180611,1026';
+my $VERSION = '5.4';  
+my $EDITDATE = '180614,0412Z';
 
 #v01 -- taken from avgrsr v7
 #v02 -- 
@@ -12,7 +12,6 @@ my $EDITDATE = '180611,1026';
 #v05 -- averaging and sockett
 
 $record{mode}=0;
-$Nsweeps=0;
 
 #====================
 # PRE-DECLARE SUBROUTINES
@@ -211,7 +210,7 @@ use constant PI => 3.14159265359;
 # DEFINE VARS  VARS='p' -> sum_p{sum sumsq,max,min,n} -> samp_p
 @VARS = ('thead','shadow','sw','lw','psp','pir','tcase','tdome','p','r','az','batt');
 @VARS = (@VARS,'g1','g2','g3','g4','g5','g6','g7');
-my $cmd = "\@VARS = (\@VARS,'a000'";
+my $cmd = "\@VARS = (\@VARS";
 for($i=1; $i<=7; $i++){
 	for($j=1; $j<=23; $j++){
 		$cmd=$cmd.sprintf ",'a%d%02d'",$i,$j;
@@ -219,7 +218,7 @@ for($i=1; $i<=7; $i++){
 }
 $cmd=$cmd.');';
 eval $cmd;
-#$ii=0;foreach(@VARS){print "$ii  $_\n"; $ii++} die;
+#$ii=0;foreach(@VARS){print "$ii  $_,  "; $ii++} die;
 # CLEAR ACCUMULATOR ARRAYS
 ClearAccumulatorArrays();		# Prepare for averaging first record
 
@@ -237,13 +236,10 @@ $rawoutfile=sprintf"$datapath/avgraw_%4d%02d%02d.txt",$dt[0],$dt[1],$dt[2];
 # print D "Open debug\n";
 # close D;
 
-$Nsweeps=0;
 while ( 1 ) {
 	$ix=ReadNextRecord($datapath);
 	if($ix == 1 ) {last}
 };
-# $str="First record";  print"$str\n";
-# system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 
 AccumulateStats();
 
@@ -285,20 +281,15 @@ while ( 1 ) {
 		if ( $record{dt} >= $dt2 ) { last; }
 		else {		
 			AccumulateStats();
-# $str="Line 284";  print"$str\n";
-# system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 		}
 	}
 	#====================
 	# COMPUTE SAMPLE STATS
 	#====================
-# $str="Line 291";  print"$str\n";
-# system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 	ComputeStats();	
 		#xx debug
 	
 	SaveStats($dt_samp, $datapath);
-	$Nsweeps=0;
 	if ( $record{mode} == 1 ) {$N_H=1} else {$N_H=0}
 	
 	ClearAccumulatorArrays();		# Prepare for averaging first record
@@ -444,20 +435,7 @@ sub ReadNextRecord
 	
 		@x = ComputeLongwave($record{pir},$record{tcase},$record{tdome},$Kcoefficient,$sigma,$epsilon,$missing);
 		$record{lw}=$x[0];
-#@VARS = ('thead','shadow','sw','lw','psp','pir','tcase','tdome','p','r','az','batt');
-	
-# 		printf"mode = %d\n", $record{mode};
-# 		printf"Thead = %.2f\n", $record{thead};
-# 		printf"pitch=%.2f\n",$record{p};
-# 		printf"roll=%.2f\n",$record{r};
-# 		printf"heading=%.2f\n",$record{az};
-# 		printf"psp=%.2f  %.2f\n",$record{psp}, $record{sw};
-# 		printf"pir=%.2f   %.2f\n",$record{pirv}, $record{pir};
-# 		printf"case=%.2f   %.2f\n",$record{case}, $record{tcase};
-# 		printf"dome=%.2f   %.2f\n",$record{dome}, $record{tdome};
-# 		printf"lw = %.2f\n", $record{lw};
-# 		printf"batt=%.2f\n",$record{batt};
-# 		die;
+
 			# WIPRR -- PRP BASIC DATA
 		$str=sprintf"\$WIPRR,%s,%d,%.1f,%.1f,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.1f,%.1f,%.1f,%.1f*",
 		$timestamp,$record{mode},$record{thead},$record{shadow},$ShadowRatioThreshold,$record{sw},$record{lw},
@@ -465,9 +443,9 @@ sub ReadNextRecord
 		$str=$str.NmeaChecksum($str);
 		open F,">>$rawoutfile" or die;
 		print F "$str\n";
-# 		print "$str\n";  #-->> PRINT WIPRR
-$str =~ s/\$//;
-system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
+		#print "$str\n";  #-->> PRINT WIPRR
+# $str =~ s/\$//;
+# system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 				# CHANGE INPUT TYPE -- HIGH TO LOW		
 		if ( $record{mode}==0 && $N_H > 0) {
 			print"Begin low input, reset Accumulators\n";
@@ -480,11 +458,6 @@ system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 			ClearAccumulatorArrays();
 		}
 	
-			# RECORD ARRAY = missing 
-		for( $i=$NHsweeps[0]; $i <= $NHsweeps[1]; $i++) {
-			$cmd = sprintf("\$record\{a%03d\} = \$missing;",$i-$NHsweeps[0]);
-			eval($cmd);
-		}
 		#===================
 		# FILL RECORD ARRAY, HIGH MODE
 		#===================
@@ -495,8 +468,8 @@ system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 				if($r[$i]>0 && $r[$i]<4000){
 					$n++; $x=$r[$i];
 				}
-				if($r[$i+8]>0 && $r[$i+8]<4000){
-					$n++; $x+=$r[$i+8];
+				if($r[$i+7]>0 && $r[$i+7]<4000){
+					$n++; $x+=$r[$i+7];
 				}
 				if($n==0){$x=$missing} else{$x=$x/$n}
 				$cmd=sprintf"\$record{g%d}=\$x;",$i-25;
@@ -509,18 +482,25 @@ system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 				#print"cmd = $cmd\n";
 				eval $cmd;
 			}
-			$str=$str."*";
+		     $str=$str."*";
 			$str=$str.NmeaChecksum($str);
 			print F " $str\n";		
-			print " $str\n";  #-->> PRINT WIPRG
+			#print " $str\n";  #-->> PRINT WIPRG
 # $str=~s/\$//;
 # system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 			$N_H++;
+
+			# RECORD ARRAY = missing 
+# 		for( $i=1; $i<=7; $i++) {
+# 			for($j=1; $j<=23; $j++){
+# 				$cmd = sprintf("\$record\{a%d%02d\} = \$missing;",$i,$j);
+# 				eval($cmd);
+# 			}
+# 		}
 				
 				# HIGH -- SHADOW
 			if( $#r > 39 && $record{shadow} >= $ShadowRatioThreshold){
 				$i0=40;
-				$Nsweeps++;
 				for( $i=1; $i<=7; $i++) {
 					$str="\$WIPR".sprintf"%d,%s",$i,$timestamp;
 					for($j=1; $j<=23; $j++){
@@ -529,15 +509,12 @@ system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 						#print"$cmd\n";
 						eval($cmd);
 						$cmd=sprintf"\$str=\$str.sprintf\",%%d\",\$record{a%d%02d};",$i,$j;
-						#print"$cmd\n";
 						eval $cmd;
 					}
 					$str=$str."*";
 					$str=$str.NmeaChecksum($str);
 					print F " $str\n";
 					#print " $str\n";  #-->> PRINT WIPR1...WIPR7
-# $str=~s/\$//;
-# system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 				}
 			}
 		}
@@ -674,15 +651,43 @@ if($telnetserverip == 0){}else{system "$socketprogram $telnetserverip $telnetser
 		# SWEEP BINS
 		# note naming -- aji, j=1..7, i=01..23, 'a%d%02d'",$j,$i;
 		if($samp_shadow{mn} >= $ShadowRatioThreshold) {
-			for($j=0; $j<7; $j++) {
-				$str='';
-				for($i=0; $i<23; $i++) { 
-					eval(sprintf("\$str = \$str.sprintf \" %%6.1f\", \$samp_a%d%02d{mn};",$j,$i));
+			for($j=1; $j<=7; $j++) {
+				$str='xx';
+				for($i=1; $i<=23; $i++) {
+					$cmd=sprintf("\$str = \$str.sprintf \" %%6.1f\", \$samp_a%d%02d{mn};",$j,$i);
+					eval($cmd);
 				}
 				print F "$str\n";
 				print "$str\n";
-if($telnetserverip == 0){}else{system "$socketprogram $telnetserverip $telnetserverport \"$str\""}
 			}
+	  		$strout=sprintf "  1 %.1f(%.1f), %.1f(%.1f), %.1f(%.1f)",
+			$samp_a108{mn},$samp_a108{std}, $samp_a112{mn},$samp_a112{std},
+			$samp_a116{mn},$samp_a116{std};
+if($telnetserverip == 0){}else{system "$socketprogram $telnetserverip $telnetserverport \"$strout\""}
+	  		$strout=sprintf "  2 %.1f(%.1f), %.1f(%.1f), %.1f(%.1f)",
+			$samp_a208{mn},$samp_a208{std}, $samp_a212{mn},$samp_a212{std},
+			$samp_a216{mn},$samp_a216{std};
+if($telnetserverip == 0){}else{system "$socketprogram $telnetserverip $telnetserverport \"$strout\""}
+	  		$strout=sprintf "  3 %.1f(%.1f), %.1f(%.1f), %.1f(%.1f)",
+			$samp_a308{mn},$samp_a308{std}, $samp_a312{mn},$samp_a312{std},
+			$samp_a316{mn},$samp_a316{std};
+if($telnetserverip == 0){}else{system "$socketprogram $telnetserverip $telnetserverport \"$strout\""}
+	  		$strout=sprintf "  4 %.1f(%.1f), %.1f(%.1f), %.1f(%.1f)",
+			$samp_a408{mn},$samp_a408{std}, $samp_a412{mn},$samp_a412{std},
+			$samp_a416{mn},$samp_a416{std};
+if($telnetserverip == 0){}else{system "$socketprogram $telnetserverip $telnetserverport \"$strout\""}
+	  		$strout=sprintf "  5 %.1f(%.1f), %.1f(%.1f), %.1f(%.1f)",
+			$samp_a508{mn},$samp_a508{std}, $samp_a512{mn},$samp_a512{std},
+			$samp_a516{mn},$samp_a516{std};
+if($telnetserverip == 0){}else{system "$socketprogram $telnetserverip $telnetserverport \"$strout\""}
+	  		$strout=sprintf "  6 %.1f(%.1f), %.1f(%.1f), %.1f(%.1f)",
+			$samp_a608{mn},$samp_a608{std}, $samp_a612{mn},$samp_a612{std},
+			$samp_a616{mn},$samp_a616{std};
+if($telnetserverip == 0){}else{system "$socketprogram $telnetserverip $telnetserverport \"$strout\""}
+	  		$strout=sprintf "  7 %.1f(%.1f), %.1f(%.1f), %.1f(%.1f)",
+			$samp_a708{mn},$samp_a708{std}, $samp_a712{mn},$samp_a712{std},
+			$samp_a716{mn},$samp_a716{std};
+if($telnetserverip == 0){}else{system "$socketprogram $telnetserverip $telnetserverport \"$strout\""}
 		}
 	}
 	close F;
