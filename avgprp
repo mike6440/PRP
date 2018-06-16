@@ -287,7 +287,6 @@ while ( 1 ) {
 	# COMPUTE SAMPLE STATS
 	#====================
 	ComputeStats();	
-		#xx debug
 	
 	SaveStats($dt_samp, $datapath);
 	if ( $record{mode} == 1 ) {$N_H=1} else {$N_H=0}
@@ -652,7 +651,7 @@ if($telnetserverip == 0){}else{system "$socketprogram $telnetserverip $telnetser
 		# note naming -- aji, j=1..7, i=01..23, 'a%d%02d'",$j,$i;
 		if($samp_shadow{mn} >= $ShadowRatioThreshold) {
 			for($j=1; $j<=7; $j++) {
-				$str='xx';
+				$str='';
 				for($i=1; $i<=23; $i++) {
 					$cmd=sprintf("\$str = \$str.sprintf \" %%6.1f\", \$samp_a%d%02d{mn};",$j,$i);
 					eval($cmd);
