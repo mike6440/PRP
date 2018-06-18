@@ -15,9 +15,5 @@
 # https://askubuntu.com/questions/9853/how-can-i-make-rc-local-run-on-startup
 
 echo rc.local boot >> $HOME/tmp/bootlog
-
 bash $HOME/swmain/apps/PRP/sw/tools/boot_script.sh
-
-
-
 exit 0

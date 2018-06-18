@@ -1,7 +1,7 @@
 	THIS FILE NAME: su_prp7_1805.txt
 	Editdate: 20180612T151941Z
    	#!! simulate 1, standard com 0
-SIMULATEFLAG: 1
+SIMULATEFLAG: 0
 PRP SERIAL NUMBER: 7
 RS232 FLAG: 1
     This file will be set with the START command.

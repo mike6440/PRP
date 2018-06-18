@@ -1,4 +1,44 @@
+edit:180616
+            START DATA COLLECTION
+         ----------------------------
+ 1.  gtdaq                          -- move to the software folder (swmain/apps/PRP/sw)
+ 
+ 2.  Date                           -- Check date. BE SURE IT IS UTC.
+ 
+ 3.  SetDate                        -- Set UTC time (optional)
+                                       SetDate password yyyy MM dd hh mm ss
+                                       password is the current password of the PRP PC.
+                                       e.g. SetDate r0srr0sr 2018 06 15 04 22 00
+                                       
+ 4.  nano setup/su.txt              -- Edit the setup file. ONLY if NECESSARY!!
+ 
+ 5.  Archive                        -- Save previous data in ~/prpdata (optional)
+ 
+ 6.  Wipe [y]                       -- Clear the data folder.  (optional)
+ 
+ 7.  Start                          -- Begins data collection.
+ 
+ 8.  Raw                            -- end with ^c.
+                                       This is the data written to the raw file.\
+            TELNET SOCKET
+        -----------------------------------
+ 1. Choose server IP and port.
 
+ 2. nano setup/su.txt               -- edit setup file for 
+                                            TELNET PROGRAM: socktxx
+                                            TELNET SERVER IP: 10.1.10.86
+                                            TELNET SERVER PORT: 5555
+                                          ^x and y to save
+ 3. Initiate socket on server.      -- (sockrx can be used.)
+                                       sockrx 190.168.255.2 5555 /tmp/prpcap.txt
+                                       See Handbook v5
+            STOP DATA COLLECTION
+        -----------------------------------
+ 1. Stop                            -- Kill background process.
+ 
+ 2. Archive                         -- Save data in ~/prpdata.  (optional)
+ 
+ 3. Wipe y                          -- Clear the data folder. (optional)
             SET UP THE PRP PC
         -----------------------------------
 
@@ -22,24 +62,6 @@
  9. End I connect                   -- "<control>-\ q"
                                        Hold control and press '\'. Release and press 'q'.
                                        or leave it running and open another terminal.                                    
-            BEGIN DATA COLLECTION
-         ----------------------------
- 1.  gtdaq                          -- move to the software folder (swmain/apps/sw)
- 
- 2.  SetDate                        -- Set UTC time
-                                       example: "SetDate password 2015 08 04 02 05 34"
-                                       password is the current password of the PRP PC.
-                                       
- 3.  gedit setup/su.txt             -- Edit the setup file. ONLY if NECESSARY!!
- 
- 4.  Archive                        -- Optional, see "SAVE DATA" below.
- 
- 5.  Wipe [y]                       -- Optional, see "DELETE DATA" below.
- 
- 6.  Start                          -- Begins data collection.
- 
- 7.  Raw                            -- end with ^c.
-                                       This is the data written to the raw file.
              COMMON TERMINAL COMMANDS
           -------------------------------
 
