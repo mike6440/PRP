@@ -64,6 +64,7 @@ Start () {
 	if [ $? -eq 0 ]; then
 		echo "DAQ is already running."
 	else 
+		echo START DAQ >> $HOME/tmp/bootlog
 		touch ~/tmp/daqstart;
 		KillScreen > /dev/null 2>&1;
 		cd $DAQSWFOLDER;
@@ -72,6 +73,7 @@ Start () {
 		crontab $DAQSWFOLDER/tools/crontab_prp.txt
 		screen -S PRP -d -m -c $DAQSWFOLDER/tools/screenrc_prp.txt
 		screen -S PRP -p 1 -X stuff "G$(printf \\r)"
+		isscreen >> $HOME/tmp/bootlog
 		isscreen
 	fi
 }
@@ -102,7 +104,7 @@ alias suedit='vim $DAQSWFOLDER/setup/su.txt'
 alias llb="ls -l ~/tmp"
 
 # v10 add reboot capability
-alias bootlog="tail ~/tmp/bootlog"
+alias bootlog="less ~/tmp/bootlog"
 # restart set AutoStartFlag in /etc/rc.local (ubuntu > 16.04)
 if [ -e ${HOME}/tmp/AutoStartFlag ] 
     then

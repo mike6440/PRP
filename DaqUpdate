@@ -1,5 +1,5 @@
-#!/usr/bin/perl -w
-# 2015-05-30,1121
+#!/usr/bin/perl -X
+# 20180624T213811Z
 
 use lib $ENV{MYLIB};
 use perltools::MRtime;
@@ -11,25 +11,37 @@ my @d = (1800);
 my @v = ();
 
 #       prpraw      1521529544      3    600   OK
-print"  file       last sec        dif  lim   status\n";
-printf"  NOW =      %10d\n",now();
-my $os=tz_local_offset();
+#print"  file       last sec        dif  lim   status\n";
+#printf"  NOW =      %10d\n",now();
 
+my $os=tz_local_offset();
 	# SELECT STREAM
 my $is;
 for($is=0; $is<=$#f; $is++){
 	my $f=$f[$is];
+	#print"process $f\n";
 		# FILE MOD TIME
-	my $mtime = (stat `LastDataFolder $f`)[9]-$os;
+	chomp ($str = `LastDataFolder $f`);
+	if(! -f $str){
+		#print"$f folder is missing.\n";
+		print"0";
+		`echo 0 > /tmp/tmpdaq`;
+		exit 1;
+	}	print"$str\n"; die;
+	my $mtime=(stat $str)[9]-$os;
+	
 	my $age = now() - $mtime;
-	printf"%10s   %10d   %4d   %4d   ",$f,$mtime,$age,$d[$is];
-	if ($age > $d[$is]){print"FAIL\n"; push @v,0}
-	else{ print"OK\n"; push @v, 1;  }
+	#printf"%10s   %10d   %4d   %4d   ",$f,$mtime,$age,$d[$is];
+	if ($age > $d[$is]){
+		#print"$f FAIL\n"; 
+		push @v,0
+	} else{ 
+		#print"$f OK\n"; 
+		push @v, 1;  }
 }
 my $good=1;
-print"@v\n";
+#print"@v\n";
 foreach(@v){if($_ == 0){$good=0}}
-#print"good = $good\n";
+print"$good";
 `echo $good > /tmp/tmpdaq`;
-
 exit 0

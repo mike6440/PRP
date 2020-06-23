@@ -4,7 +4,7 @@
 
 my $PROGRAMNAME = 'avgprp';
 my $VERSION = '5.4';  
-my $EDITDATE = '180614,0412Z';
+my $EDITDATE = '20180624T234458Z';
 
 #v01 -- taken from avgrsr v7
 #v02 -- 
@@ -380,7 +380,7 @@ sub ReadNextRecord
 			if($n==0){$x=$missing} else{$x=$x/$n}
 			push @av,$x;
 		}
-		#$i=0; foreach(@av){printf"debug:%3d %.3f\n",$i,$_; $i++} die;
+# 		$i=0; foreach(@av){printf"debug:%3d %.3f\n",$i,$_; $i++} die;
 		#==============
 		# FILL IN RECORD
 		#==============
@@ -442,7 +442,7 @@ sub ReadNextRecord
 		$str=$str.NmeaChecksum($str);
 		open F,">>$rawoutfile" or die;
 		print F "$str\n";
-		#print "$str\n";  #-->> PRINT WIPRR
+		print "$str\n";
 # $str =~ s/\$//;
 # system "$socketprogram $telnetserverip $telnetserverport \"$str\"";
 				# CHANGE INPUT TYPE -- HIGH TO LOW		

@@ -1,9 +1,9 @@
 #!/usr/bin/perl -X
-# edit 20170802T151617Z
+# edit 20180624T214621Z
 
 	## RUN FROM THE DAQ sw folder
 	# PERLTOOL IN THE ~/sw/perl FOLDER
-use lib "$ENV{DAQLIB}";
+use lib "$ENV{MYLIB}";
 use perltools::MRtime;
 use perltools::MRutilities;
 

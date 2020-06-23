@@ -9,7 +9,7 @@
 #   $#ARGV=1    socktxx ip port  :: computes ROSST string and send it to ip/port.
 #   $#ARGV=2    socktxx ip port "string" :: sends "string" to ip/port.
 
-use lib $ENV{DAQLIB};
+use lib $ENV{MYLIB};
 use perltools::MRtime;
 use perltools::MRutilities;
 # use perltools::MRsensors;
