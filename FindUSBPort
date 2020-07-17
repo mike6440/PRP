@@ -5,7 +5,7 @@
 #   FindUSBPort 2 =>> finds COM2 if available
 # returns nothing otherwise
  
-@w = `ls /dev/tty*PL* 2>/dev/null`;
+@w = `ls /dev/tty*232* 2>/dev/null`;
 @x = `ls /dev/tty*USB* 2>/dev/null`;
 @y = `ls /dev/tty*usb* 2>/dev/null`;
 @w=(@y,@w,@x);
