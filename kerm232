@@ -1,5 +1,5 @@
 #!/usr/bin/expect --
-#edit 20170625T225623Z
+#edit 2020-7-21
 #kermit_serial_connect.ex
 #Note: the file .kermrc has the command "prompt k>>"
 #v2 180517 -- add sudo to kermit call
@@ -70,7 +70,7 @@ expect ">>"
 send "set file type binary\r"
 expect ">>"
 ## LOG
-send "log session /tmp/kermlog.txt\r"
+send "log session ../data/kermlog.txt append\r"
 expect ">>"
 ## CONNECT 
 send "connect\r"
